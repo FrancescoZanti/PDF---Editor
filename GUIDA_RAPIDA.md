@@ -1,5 +1,7 @@
 # 🚀 GUIDA RAPIDA - PDF EDITOR PRO v2.0
 
+> **⚠️ NOTA**: La versione PRO utilizza ancora l'interfaccia tkinter. Per utilizzare la nuova interfaccia moderna PySide6, usa l'**Editor Base** con `python pdf_editor.py`
+
 ## 📋 Come Iniziare
 
 ### Avvio Rapido
