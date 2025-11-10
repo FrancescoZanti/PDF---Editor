@@ -5,7 +5,7 @@ reportlab
 PyMuPDF
 pytesseract
 cryptography
-tkinter-tooltip
+PySide6
 matplotlib
 numpy
 opencv-python

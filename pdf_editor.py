@@ -13,6 +13,8 @@ Funzionalità principali:
 - Estrazione del testo dai PDF
 - Conversione di immagini in PDF
 - Anteprima delle pagine
+
+Versione PySide6 con interfaccia moderna
 """
 
 import sys
@@ -38,8 +40,11 @@ try:
 except ImportError as e:
     print(f"Errore nell'importazione: {e}")
     print("Assicurati che tutte le dipendenze siano installate:")
-    print("pip install pypdf pillow pdf2image reportlab")
+    print("pip install -r requirements.txt")
+    print("In particolare: pip install PySide6 pypdf pillow pdf2image reportlab")
     sys.exit(1)
 except Exception as e:
     print(f"Errore durante l'avvio dell'applicazione: {e}")
+    import traceback
+    traceback.print_exc()
     sys.exit(1)
