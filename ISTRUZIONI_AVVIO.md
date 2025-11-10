@@ -39,6 +39,11 @@ python pdf_editor.py
 pip install -r requirements.txt
 ```
 
+**Nota:** Assicurati che PySide6 sia installato:
+```bash
+pip install PySide6
+```
+
 ### Problema: Errori di encoding nel terminale
 **Soluzione:**
 - Usa il file PowerShell: `Avvia_PDF_Editor.ps1`
@@ -54,13 +59,14 @@ python pdf_editor.py
 - `pdf_editor.py` - Script principale
 - `avvia_pdf_editor.bat` - Launcher batch Windows
 - `Avvia_PDF_Editor.ps1` - Launcher PowerShell (raccomandato)
-- `src/main.py` - Applicazione core
+- `src/main.py` - Applicazione core (PySide6)
 
 ## 🎯 Cosa Aspettarsi
 
 Quando avvii l'applicazione correttamente, vedrai:
-1. Una finestra grafica con titolo "PDF Editor - Modifica PDF"
-2. 8 pulsanti colorati per le diverse funzioni:
+1. Una finestra grafica moderna con titolo "PDF Editor - Modifica PDF"
+2. **Interfaccia moderna Windows 11** con angoli arrotondati e colori moderni
+3. 8 pulsanti colorati con effetti hover per le diverse funzioni:
    - Unisci PDF (blu)
    - Dividi PDF (rosso)  
    - Ruota PDF (arancione)
@@ -69,7 +75,16 @@ Quando avvii l'applicazione correttamente, vedrai:
    - Estrai Testo (grigio scuro)
    - Converti Immagini (arancione scuro)
    - Anteprima PDF (verde)
-3. Un'area di output in basso per i messaggi
+4. Un'area di output in basso per i messaggi
+5. **Dialog nativi di Windows 11** per l'apertura e il salvataggio dei file
+
+## 🆕 Novità - Interfaccia PySide6
+
+L'applicazione ora utilizza **PySide6 (Qt)** invece di tkinter, offrendo:
+- ✅ Design moderno compatibile con Windows 11
+- ✅ Prestazioni migliorate
+- ✅ Dialog file nativi del sistema operativo
+- ✅ Supporto per schermi ad alta risoluzione (4K, 8K)
 
 ## 🔧 Se Nulla Funziona
 
@@ -87,6 +102,7 @@ Tutti i test superati!
 ```
 
 Se il test fallisce, controlla:
-1. Python installato correttamente
-2. Dipendenze installate: `pip install pypdf pillow pdf2image reportlab`
+1. Python installato correttamente (versione 3.8 o superiore)
+2. Dipendenze installate: `pip install PySide6 pypdf pillow pdf2image reportlab`
 3. Sei nella directory corretta del progetto
+4. Su Windows, verifica che non ci siano conflitti con altre installazioni Qt

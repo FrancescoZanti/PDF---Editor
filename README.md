@@ -1,6 +1,10 @@
 # PDF Editor - Applicazione Desktop Python
 
-Una potente applicazione desktop per modificare file PDF sviluppata in Python con interfaccia grafica tkinter, completamente compatibile con Windows.
+Una potente applicazione desktop per modificare file PDF sviluppata in Python con interfaccia grafica moderna basata su **PySide6 (Qt)**, completamente compatibile con Windows 11.
+
+| Interfaccia Moderna | Con Contenuto |
+|:-------------------:|:-------------:|
+| ![PDF Editor UI](assets/pyside6_modern_ui.png) | ![PDF Editor con contenuto](assets/pyside6_with_content.png) |
 
 ## 🚀 Funzionalità Principali
 
@@ -37,6 +41,7 @@ pip install -r requirements.txt
 Installa le dipendenze una per una:
 
 ```bash
+pip install PySide6
 pip install pypdf
 pip install pillow
 pip install pdf2image
@@ -74,11 +79,13 @@ python main.py
 
 ### Interfaccia Utente
 
-L'applicazione presenta un'interfaccia grafica intuitiva con:
+L'applicazione presenta un'interfaccia grafica moderna e intuitiva con:
 
-- **Pulsanti delle funzioni** - 8 pulsanti colorati per le diverse operazioni
-- **Area di output** - Mostra i risultati e i messaggi delle operazioni
-- **Design moderno** - Interfaccia pulita e professionale
+- **Pulsanti delle funzioni** - 8 pulsanti colorati con effetti hover per le diverse operazioni
+- **Area di output** - Mostra i risultati e i messaggi delle operazioni in tempo reale
+- **Design moderno Windows 11** - Interfaccia pulita con angoli arrotondati, ombre e animazioni fluide
+- **Temi Qt nativi** - Supporto per i temi del sistema operativo
+- **Interfaccia responsive** - Si adatta a diverse risoluzioni dello schermo
 
 ### Esempi di Utilizzo
 
@@ -120,11 +127,20 @@ PDF-Editor/
 ## 🔧 Tecnologie Utilizzate
 
 - **Python 3.8+** - Linguaggio di programmazione principale
-- **tkinter** - Framework per l'interfaccia grafica (incluso in Python)
+- **PySide6 (Qt)** - Framework moderno per l'interfaccia grafica con supporto nativo Windows 11
 - **pypdf** - Libreria per la manipolazione dei PDF
 - **Pillow (PIL)** - Gestione delle immagini
 - **reportlab** - Creazione di PDF e watermark
 - **pdf2image** - Conversione PDF in immagini per l'anteprima
+
+### Perché PySide6?
+
+- ✅ **Interfaccia moderna** - Look and feel nativo di Windows 11
+- ✅ **Performance migliorate** - Rendering più veloce e fluido
+- ✅ **Temi avanzati** - Supporto completo per temi scuri e chiari
+- ✅ **Scalabilità** - Supporto nativo per DPI elevati (4K, 8K)
+- ✅ **Cross-platform** - Funziona su Windows, macOS e Linux
+- ✅ **Manutenzione attiva** - Libreria Qt mantenuta attivamente
 
 ## 🐛 Risoluzione dei Problemi
 
