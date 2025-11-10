@@ -1,12 +1,31 @@
 # PDF Editor Pro - Advanced PDF Editor
 
-Una potente applicazione desktop per modificare file PDF con funzionalità avanzate simili ad **Adobe Acrobat DC**, sviluppata in Python e completamente compatibile con Windows.
+Una potente applicazione desktop per modificare file PDF con funzionalità avanzate simili ad **Adobe Acrobat DC**, sviluppata in Python con interfaccia moderna **PySide6 (Qt)** e completamente compatibile con Windows.
+
+## 🆚 Base vs Pro - Scegli la Versione Giusta
+
+| Caratteristica | PDF Editor Base | PDF Editor Pro |
+|----------------|-----------------|----------------|
+| **Launcher** | `pdf_editor.py` | `pdf_editor_pro.py` |
+| **Interfaccia** | PySide6 moderna | PySide6 professionale |
+| **Unisci/Dividi PDF** | ✅ | ✅ |
+| **Ruota/Estrai Pagine** | ✅ | ✅ |
+| **Watermark Base** | ✅ | ✅ Avanzato |
+| **Conversione Immagini** | ✅ | ✅ |
+| **Editing Visuale** | ❌ | ✅ |
+| **Annotazioni/Markup** | ❌ | ✅ |
+| **Form Interattivi** | ❌ | ✅ |
+| **Crittografia/Password** | ❌ | ✅ |
+| **Firma Digitale** | ❌ | ✅ |
+| **Ideale per** | Operazioni veloci | Editing professionale |
+
+**💡 Consiglio**: Inizia con la versione Base per familiarizzare, poi passa alla Pro per funzionalità avanzate.
 
 ## 🌟 NOVITÀ PDF EDITOR PRO v2.0
 
 ### ✨ Tre Modalità di Utilizzo
 
-1. **🎯 EDITOR AVANZATO** - Interfaccia stile Adobe Acrobat
+1. **🎯 EDITOR AVANZATO** - Interfaccia stile Adobe Acrobat con PySide6
 2. **📝 EDITOR BASE** - Funzioni essenziali semplificate  
 3. **📋 EDITOR FORM** - Specializzato per form interattivi
 
@@ -174,8 +193,8 @@ PDF-Editor/
 
 ### **Core**
 - **Python 3.8+** - Linguaggio principale
-- **tkinter** - Framework GUI nativo Windows
-- **PyMuPDF (fitz)** - Engine PDF avanzato per editing
+- **PySide6 (Qt 6)** - Framework GUI moderno per interfaccia professionale Windows 11
+- **PyMuPDF (fitz)** - Engine PDF avanzato per editing visuale
 - **Pillow (PIL)** - Elaborazione immagini avanzata
 
 ### **Sicurezza**
@@ -188,8 +207,9 @@ PDF-Editor/
 - **opencv-python** - Computer vision per OCR futuro
 
 ### **Base (dalla versione originale)**
-- **pypdf** - Manipolazione PDF base
-- **pdf2image** - Conversione PDF in immagini
+- **pypdf** - Manipolazione PDF base (merge, split, rotate)
+- **pdf2image** - Conversione PDF in immagini per anteprima
+- **reportlab** - Generazione PDF e watermark
 
 ## 🆚 Confronto Versioni
 
