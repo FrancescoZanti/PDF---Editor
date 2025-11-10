@@ -1,0 +1,11 @@
+pypdf
+pillow
+pdf2image
+reportlab
+PyMuPDF
+pytesseract
+cryptography
+tkinter-tooltip
+matplotlib
+numpy
+opencv-python
