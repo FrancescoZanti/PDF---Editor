@@ -5,8 +5,10 @@ PDF Editor Pro - Advanced PDF Editor with Acrobat-like features
 Versione professionale con funzionalità avanzate simili ad Adobe Acrobat DC
 """
 
-import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
+                               QPushButton, QLabel, QMessageBox, QFileDialog, QDialog)
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont
 import sys
 import os
 from pathlib import Path
@@ -29,303 +31,230 @@ try:
 except ImportError as e:
     print(f"Alcune funzionalità avanzate non sono disponibili: {e}")
     # Fallback alla versione base
-    from main import PDFEditor, main as basic_main
     try:
+        from main import main as basic_main
         from user_config import user_config
     except ImportError:
         user_config = None
     ADVANCED_FEATURES = False
 
-def show_feature_selection():
-    """Mostra la finestra di selezione delle funzionalità"""
-    root = tk.Tk()
-    root.title("PDF Editor Pro - Selezione Modalità")
-    
-    # Usa configurazione per dimensioni finestra
-    if user_config:
-        window_size = user_config.get("window_size", "500x400")
-        window_pos = user_config.get("window_position", "center")
-    else:
-        window_size = "500x400"
-        window_pos = "center"
-    
-    root.geometry(window_size)
-    root.configure(bg='#f0f0f0')
-    
-    # Centra la finestra
-    if window_pos == "center":
-        root.update_idletasks()
-        x = (root.winfo_screenwidth() // 2) - (root.winfo_width() // 2)
-        y = (root.winfo_screenheight() // 2) - (root.winfo_height() // 2)
-        root.geometry(f"+{x}+{y}")
-    
-    # Menu bar
-    menubar = tk.Menu(root)
-    root.config(menu=menubar)
-    
-    # Menu File
-    file_menu = tk.Menu(menubar, tearoff=0)
-    menubar.add_cascade(label="File", menu=file_menu)
-    
-    def open_recent_file(file_path):
-        """Apre un file recente nell'editor appropriato"""
-        # Determina la modalità preferita
-        default_mode = user_config.get("default_mode", "advanced") if user_config else "advanced"
+class FeatureSelectionDialog(QDialog):
+    """Finestra di selezione delle modalità"""
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("PDF Editor Pro - Selezione Modalità")
+        self.resize(600, 600)
+        self.setStyleSheet("background-color: #f0f0f0;")
         
-        if default_mode == "advanced" and ADVANCED_FEATURES:
-            root.destroy()
-            advanced_root = tk.Tk()
-            app = AcrobatLikeGUI(advanced_root)
-            app.pdf_editor.open_pdf(file_path)
-            advanced_root.mainloop()
+        # Centra la finestra
+        screen_geometry = QApplication.primaryScreen().geometry()
+        x = (screen_geometry.width() - self.width()) // 2
+        y = (screen_geometry.height() - self.height()) // 2
+        self.move(x, y)
+        
+        self.setup_ui()
+        
+    def setup_ui(self):
+        """Configura l'interfaccia utente"""
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(40, 20, 40, 20)
+        layout.setSpacing(15)
+        
+        # Titolo
+        title_label = QLabel("PDF EDITOR PRO")
+        title_label.setFont(QFont('Arial', 20, QFont.Bold))
+        title_label.setAlignment(Qt.AlignCenter)
+        title_label.setStyleSheet("color: #2c3e50;")
+        layout.addWidget(title_label)
+        
+        # Sottotitolo
+        subtitle_label = QLabel("Scegli la modalità di utilizzo")
+        subtitle_label.setFont(QFont('Arial', 12))
+        subtitle_label.setAlignment(Qt.AlignCenter)
+        subtitle_label.setStyleSheet("color: #666;")
+        layout.addWidget(subtitle_label)
+        
+        layout.addSpacing(20)
+        
+        # Pulsante Editor Avanzato
+        if ADVANCED_FEATURES:
+            advanced_btn = QPushButton("🎯 EDITOR AVANZATO\n(Simile ad Adobe Acrobat)")
+            advanced_btn.setFont(QFont('Arial', 12, QFont.Bold))
+            advanced_btn.setMinimumHeight(80)
+            advanced_btn.clicked.connect(self.open_advanced_editor)
+            advanced_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #3498db;
+                    color: white;
+                    border: none;
+                    border-radius: 10px;
+                    padding: 15px;
+                }
+                QPushButton:hover {
+                    background-color: #2980b9;
+                }
+            """)
+            layout.addWidget(advanced_btn)
+            
+            advanced_desc = QLabel("• Editing visuale interattivo\n• Annotazioni e disegni\n• Pannelli laterali\n• Zoom avanzato")
+            advanced_desc.setFont(QFont('Arial', 9))
+            advanced_desc.setStyleSheet("color: #666; margin-left: 20px;")
+            layout.addWidget(advanced_desc)
+            
+            layout.addSpacing(15)
+        
+        # Pulsante Editor Base
+        basic_btn = QPushButton("📝 EDITOR BASE\n(Funzioni essenziali)")
+        basic_btn.setFont(QFont('Arial', 12, QFont.Bold))
+        basic_btn.setMinimumHeight(80)
+        basic_btn.clicked.connect(self.open_basic_editor)
+        basic_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #27ae60;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                padding: 15px;
+            }
+            QPushButton:hover {
+                background-color: #229954;
+            }
+        """)
+        layout.addWidget(basic_btn)
+        
+        basic_desc = QLabel("• Unisci, dividi, ruota PDF\n• Estrai testo e pagine\n• Converti immagini\n• Watermark semplici")
+        basic_desc.setFont(QFont('Arial', 9))
+        basic_desc.setStyleSheet("color: #666; margin-left: 20px;")
+        layout.addWidget(basic_desc)
+        
+        layout.addSpacing(15)
+        
+        # Pulsante Editor Form
+        if ADVANCED_FEATURES:
+            form_btn = QPushButton("📋 EDITOR FORM\n(Campi interattivi)")
+            form_btn.setFont(QFont('Arial', 12, QFont.Bold))
+            form_btn.setMinimumHeight(80)
+            form_btn.clicked.connect(self.open_form_editor)
+            form_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: #e74c3c;
+                    color: white;
+                    border: none;
+                    border-radius: 10px;
+                    padding: 15px;
+                }
+                QPushButton:hover {
+                    background-color: #c0392b;
+                }
+            """)
+            layout.addWidget(form_btn)
+            
+            form_desc = QLabel("• Crea campi di testo, checkbox\n• Radio button, dropdown\n• Gestione dati form\n• Validazione campi")
+            form_desc.setFont(QFont('Arial', 9))
+            form_desc.setStyleSheet("color: #666; margin-left: 20px;")
+            layout.addWidget(form_desc)
+        
+        layout.addStretch()
+        
+        # Info versione
+        version_text = "PDF Editor Pro v3.0 (PySide6)"
+        if ADVANCED_FEATURES:
+            version_text += " - Tutte le funzionalità disponibili"
         else:
-            # Usa editor base
-            root.destroy()
-            basic_root = tk.Tk()
-            # Qui dovremmo aprire il file nell'editor base
-            basic_root.mainloop()
-    
-    # File recenti
-    if user_config:
-        recent_files = user_config.get_recent_files()
-        if recent_files:
-            recent_menu = tk.Menu(file_menu, tearoff=0)
-            file_menu.add_cascade(label="File Recenti", menu=recent_menu)
-            
-            for file_path in recent_files:
-                file_name = os.path.basename(file_path)
-                recent_menu.add_command(
-                    label=file_name,
-                    command=lambda fp=file_path: open_recent_file(fp)
-                )
-            
-            recent_menu.add_separator()
-            recent_menu.add_command(
-                label="Pulisci Lista",
-                command=lambda: user_config.clear_recent_files()
-            )
-    
-    file_menu.add_separator()
-    file_menu.add_command(label="Esci", command=root.quit)
-    
-    # Menu Opzioni
-    options_menu = tk.Menu(menubar, tearoff=0)
-    menubar.add_cascade(label="Opzioni", menu=options_menu)
-    
-    def show_preferences():
-        """Mostra finestra preferenze"""
-        pref_window = tk.Toplevel(root)
-        pref_window.title("Preferenze")
-        pref_window.geometry("400x300")
-        pref_window.configure(bg='#f0f0f0')
+            version_text += " - Modalità base"
         
-        # Modalità predefinita
-        tk.Label(pref_window, text="Modalità predefinita:", 
-                bg='#f0f0f0', font=('Arial', 10, 'bold')).pack(pady=10)
+        version_label = QLabel(version_text)
+        version_label.setFont(QFont('Arial', 8))
+        version_label.setAlignment(Qt.AlignCenter)
+        version_label.setStyleSheet("color: #888;")
+        layout.addWidget(version_label)
         
-        mode_var = tk.StringVar(value=user_config.get("default_mode", "advanced") if user_config else "advanced")
-        mode_frame = tk.Frame(pref_window, bg='#f0f0f0')
-        mode_frame.pack(pady=5)
-        
-        tk.Radiobutton(mode_frame, text="Avanzato", variable=mode_var, value="advanced", bg='#f0f0f0').pack(side='left')
-        tk.Radiobutton(mode_frame, text="Base", variable=mode_var, value="basic", bg='#f0f0f0').pack(side='left')
-        tk.Radiobutton(mode_frame, text="Form", variable=mode_var, value="form", bg='#f0f0f0').pack(side='left')
-        
-        def save_preferences():
-            if user_config:
-                user_config.set("default_mode", mode_var.get())
-            pref_window.destroy()
-        
-        tk.Button(pref_window, text="Salva", command=save_preferences,
-                 bg='#3498db', fg='white', font=('Arial', 10, 'bold')).pack(pady=20)
-    
-    options_menu.add_command(label="Preferenze", command=show_preferences)
-    
-    # Menu Aiuto
-    help_menu = tk.Menu(menubar, tearoff=0)
-    menubar.add_cascade(label="Aiuto", menu=help_menu)
-    
-    def show_about():
-        """Mostra informazioni sull'applicazione"""
-        about_text = f"""PDF Editor Pro v2.0
-        
-Editor PDF professionale con funzionalità avanzate
-
-Funzionalità disponibili:
-{"✓ Editor Avanzato (PyMuPDF)" if ADVANCED_FEATURES else "✗ Editor Avanzato (non disponibile)"}
-{"✓ Editor Form" if ADVANCED_FEATURES else "✗ Editor Form (non disponibile)"}
-{"✓ Sicurezza e Crittografia" if ADVANCED_FEATURES else "✗ Sicurezza (non disponibile)"}
-✓ Editor Base
-
-Sviluppato con Python e tkinter
-© 2024 PDF Editor Pro"""
-        
-        messagebox.showinfo("Informazioni", about_text)
-    
-    help_menu.add_command(label="Informazioni", command=show_about)
-    
-    # Titolo
-    title_label = tk.Label(root, text="PDF EDITOR PRO", 
-                          font=('Arial', 20, 'bold'), bg='#f0f0f0', fg='#2c3e50')
-    title_label.pack(pady=20)
-    
-    subtitle_label = tk.Label(root, text="Scegli la modalità di utilizzo", 
-                             font=('Arial', 12), bg='#f0f0f0', fg='#666')
-    subtitle_label.pack(pady=10)
-    
-    # Frame per le opzioni
-    options_frame = tk.Frame(root, bg='#f0f0f0')
-    options_frame.pack(expand=True, fill='both', padx=50, pady=20)
-    
-    def open_advanced_editor():
-        """Apre l'editor avanzato tipo Acrobat"""
-        # Salva preferenza utente
+    def open_advanced_editor(self):
+        """Apre l'editor avanzato"""
         if user_config:
             user_config.set("default_mode", "advanced")
         
-        root.destroy()
+        self.accept()
+        
         if ADVANCED_FEATURES:
-            advanced_root = tk.Tk()
-            app = AcrobatLikeGUI(advanced_root)
-            advanced_root.mainloop()
+            window = AcrobatLikeGUI()
+            window.show()
+            # Keep window reference alive
+            self.advanced_window = window
         else:
-            messagebox.showerror("Errore", "Funzionalità avanzate non disponibili")
+            QMessageBox.critical(self, "Errore", "Funzionalità avanzate non disponibili")
     
-    def open_basic_editor():
+    def open_basic_editor(self):
         """Apre l'editor base"""
-        # Salva preferenza utente
         if user_config:
             user_config.set("default_mode", "basic")
         
-        root.destroy()
-        # Avvia l'editor base esistente
+        self.accept()
+        
         try:
-            import subprocess
-            subprocess.run([sys.executable, "main.py"], cwd=current_dir)
+            from main import PDFEditor
+            window = PDFEditor()
+            window.show()
+            # Keep window reference alive
+            self.basic_window = window
         except Exception as e:
-            messagebox.showerror("Errore", f"Impossibile avviare l'editor base: {e}")
+            QMessageBox.critical(self, "Errore", f"Impossibile avviare l'editor base: {e}")
     
-    def open_form_editor():
+    def open_form_editor(self):
         """Apre l'editor di form"""
-        # Salva preferenza utente
         if user_config:
             user_config.set("default_mode", "form")
         
-        root.destroy()
-        if ADVANCED_FEATURES:
-            form_root = tk.Tk()
-            form_root.withdraw()  # Nascondi finestra principale
+        if not ADVANCED_FEATURES:
+            QMessageBox.critical(self, "Errore", "Funzionalità avanzate non disponibili")
+            return
+        
+        # Crea editor PDF di base
+        pdf_editor = AdvancedPDFEditor()
+        
+        # Apri PDF
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Apri PDF per editing form",
+            "",
+            "PDF files (*.pdf)"
+        )
+        
+        if file_path:
+            # Aggiungi ai file recenti
+            if user_config:
+                user_config.add_recent_file(file_path)
             
-            # Crea editor PDF di base
-            pdf_editor = AdvancedPDFEditor()
-            
-            # Apri PDF se necessario
-            file_path = filedialog.askopenfilename(
-                title="Apri PDF per editing form",
-                filetypes=[("PDF files", "*.pdf")],
-                initialdir=user_config.get("default_save_location") if user_config else None
-            )
-            
-            if file_path:
-                # Aggiungi ai file recenti
-                if user_config:
-                    user_config.add_recent_file(file_path)
-                
-                if pdf_editor.open_pdf(file_path):
-                    form_gui = FormEditorGUI(form_root, pdf_editor)
-                    form_gui.open_form_editor()
-                    form_root.mainloop()
-                else:
-                    messagebox.showerror("Errore", "Impossibile aprire il PDF")
-                    form_root.destroy()
+            if pdf_editor.open_pdf(file_path):
+                self.accept()
+                form_gui = FormEditorGUI(None, pdf_editor)
+                form_gui.open_form_editor()
+                # Keep reference alive
+                self.form_gui = form_gui
             else:
-                form_root.destroy()
-        else:
-            messagebox.showerror("Errore", "Funzionalità avanzate non disponibili")
-    
-    # Pulsante Editor Avanzato
-    advanced_btn = tk.Button(options_frame, 
-                           text="🎯 EDITOR AVANZATO\\n(Simile ad Adobe Acrobat)",
-                           command=open_advanced_editor,
-                           font=('Arial', 12, 'bold'),
-                           bg='#3498db', fg='white',
-                           width=35, height=3,
-                           relief='raised', bd=2)
-    advanced_btn.pack(pady=10)
-    
-    advanced_desc = tk.Label(options_frame, 
-                           text="• Editing visuale interattivo\\n• Annotazioni e disegni\\n• Pannelli laterali\\n• Zoom avanzato",
-                           font=('Arial', 9), bg='#f0f0f0', fg='#666',
-                           justify='left')
-    advanced_desc.pack(pady=5)
-    
-    # Pulsante Editor Base
-    basic_btn = tk.Button(options_frame,
-                         text="📝 EDITOR BASE\\n(Funzioni essenziali)",
-                         command=open_basic_editor,
-                         font=('Arial', 12, 'bold'),
-                         bg='#27ae60', fg='white',
-                         width=35, height=3,
-                         relief='raised', bd=2)
-    basic_btn.pack(pady=10)
-    
-    basic_desc = tk.Label(options_frame,
-                         text="• Unisci, dividi, ruota PDF\\n• Estrai testo e pagine\\n• Converti immagini\\n• Watermark semplici",
-                         font=('Arial', 9), bg='#f0f0f0', fg='#666',
-                         justify='left')
-    basic_desc.pack(pady=5)
-    
-    # Pulsante Editor Form
-    if ADVANCED_FEATURES:
-        form_btn = tk.Button(options_frame,
-                           text="📋 EDITOR FORM\\n(Campi interattivi)",
-                           command=open_form_editor,
-                           font=('Arial', 12, 'bold'),
-                           bg='#e74c3c', fg='white',
-                           width=35, height=3,
-                           relief='raised', bd=2)
-        form_btn.pack(pady=10)
-        
-        form_desc = tk.Label(options_frame,
-                           text="• Crea campi di testo, checkbox\\n• Radio button, dropdown\\n• Gestione dati form\\n• Validazione campi",
-                           font=('Arial', 9), bg='#f0f0f0', fg='#666',
-                           justify='left')
-        form_desc.pack(pady=5)
-    
-    # Info versione
-    version_frame = tk.Frame(root, bg='#f0f0f0')
-    version_frame.pack(side='bottom', fill='x', pady=10)
-    
-    version_text = "PDF Editor Pro v2.0"
-    if ADVANCED_FEATURES:
-        version_text += " - Tutte le funzionalità disponibili"
-    else:
-        version_text += " - Modalità base"
-        
-    version_label = tk.Label(version_frame, text=version_text,
-                           font=('Arial', 8), bg='#f0f0f0', fg='#888')
-    version_label.pack()
-    
-    root.mainloop()
+                QMessageBox.critical(self, "Errore", "Impossibile aprire il PDF")
 
 def main():
     """Funzione principale"""
+    app = QApplication.instance()
+    if app is None:
+        app = QApplication(sys.argv)
+    
     try:
-        show_feature_selection()
+        dialog = FeatureSelectionDialog()
+        result = dialog.exec()
+        
+        # Se l'utente ha aperto un editor, mantieni l'app in esecuzione
+        if result == QDialog.Accepted:
+            return app.exec()
+        
     except Exception as e:
         print(f"Errore nell'avvio dell'applicazione: {e}")
-        # Fallback all'editor base
-        try:
-            if ADVANCED_FEATURES:
-                basic_main()
-            else:
-                root = tk.Tk()
-                app = PDFEditor(root)
-                root.mainloop()
-        except Exception as e2:
-            print(f"Errore anche nel fallback: {e2}")
-            messagebox.showerror("Errore Critico", 
-                               f"Impossibile avviare l'applicazione:\\n{e2}")
+        QMessageBox.critical(None, "Errore Critico", 
+                           f"Impossibile avviare l'applicazione:\n{e}")
+        return 1
+    
+    return 0
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

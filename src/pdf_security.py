@@ -1,6 +1,10 @@
 import fitz
-import tkinter as tk
-from tkinter import ttk, messagebox, simpledialog, filedialog
+from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
+                               QPushButton, QMessageBox, QFileDialog, QCheckBox, 
+                               QTextEdit, QComboBox, QGroupBox, QRadioButton,
+                               QTabWidget, QFrame, QInputDialog, QDialog)
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
@@ -319,8 +323,9 @@ class PDFSecurity:
         except Exception as e:
             return False, f"Errore nell'aggiunta del timbro: {str(e)}"
 
-class SecurityGUI:
+class SecurityGUI(QWidget):
     def __init__(self, parent, pdf_editor):
+        super().__init__(parent)
         self.parent = parent
         self.pdf_editor = pdf_editor
         self.security = PDFSecurity(pdf_editor)
@@ -330,107 +335,151 @@ class SecurityGUI:
     def open_security_panel(self):
         """Apre il pannello di sicurezza"""
         if self.security_window:
-            self.security_window.lift()
+            self.security_window.activateWindow()
             return
             
-        self.security_window = tk.Toplevel(self.parent)
-        self.security_window.title("Sicurezza PDF")
-        self.security_window.geometry("500x600")
-        self.security_window.configure(bg='#f0f0f0')
+        self.security_window = QDialog(self.parent)
+        self.security_window.setWindowTitle("Sicurezza PDF")
+        self.security_window.resize(500, 600)
+        self.security_window.setStyleSheet("background-color: #f0f0f0;")
         
         self.setup_security_ui()
         
-        # Gestisci chiusura finestra
-        self.security_window.protocol("WM_DELETE_WINDOW", self.close_security_panel)
+        # Mostra la finestra
+        self.security_window.show()
     
     def setup_security_ui(self):
         """Configura l'interfaccia della sicurezza"""
-        # Titolo
-        title_label = tk.Label(self.security_window, text="SICUREZZA PDF", 
-                              font=('Arial', 14, 'bold'), bg='#f0f0f0')
-        title_label.pack(pady=10)
+        layout = QVBoxLayout(self.security_window)
         
-        # Notebook per organizzare le funzioni
-        notebook = ttk.Notebook(self.security_window)
-        notebook.pack(fill='both', expand=True, padx=10, pady=5)
+        # Titolo
+        title_label = QLabel("SICUREZZA PDF")
+        title_label.setFont(QFont('Arial', 14, QFont.Bold))
+        title_label.setAlignment(Qt.AlignCenter)
+        title_label.setStyleSheet("background-color: #f0f0f0;")
+        layout.addWidget(title_label)
+        
+        # Tab widget per organizzare le funzioni
+        tab_widget = QTabWidget()
+        layout.addWidget(tab_widget)
         
         # Tab 1: Crittografia
-        encryption_frame = ttk.Frame(notebook)
-        notebook.add(encryption_frame, text="Crittografia")
-        self.setup_encryption_tab(encryption_frame)
+        encryption_widget = QWidget()
+        tab_widget.addTab(encryption_widget, "Crittografia")
+        self.setup_encryption_tab(encryption_widget)
         
         # Tab 2: Permessi
-        permissions_frame = ttk.Frame(notebook)
-        notebook.add(permissions_frame, text="Permessi")
-        self.setup_permissions_tab(permissions_frame)
+        permissions_widget = QWidget()
+        tab_widget.addTab(permissions_widget, "Permessi")
+        self.setup_permissions_tab(permissions_widget)
         
         # Tab 3: Firma digitale
-        signature_frame = ttk.Frame(notebook)
-        notebook.add(signature_frame, text="Firma Digitale")
-        self.setup_signature_tab(signature_frame)
+        signature_widget = QWidget()
+        tab_widget.addTab(signature_widget, "Firma Digitale")
+        self.setup_signature_tab(signature_widget)
         
         # Tab 4: Sicurezza avanzata
-        advanced_frame = ttk.Frame(notebook)
-        notebook.add(advanced_frame, text="Avanzate")
-        self.setup_advanced_tab(advanced_frame)
+        advanced_widget = QWidget()
+        tab_widget.addTab(advanced_widget, "Avanzate")
+        self.setup_advanced_tab(advanced_widget)
     
     def setup_encryption_tab(self, parent):
         """Configura il tab crittografia"""
+        layout = QVBoxLayout(parent)
+        
         # Stato corrente
-        status_frame = tk.LabelFrame(parent, text="Stato Crittografia")
-        status_frame.pack(fill='x', padx=10, pady=5)
+        status_group = QGroupBox("Stato Crittografia")
+        status_layout = QVBoxLayout(status_group)
         
-        self.encryption_status_label = tk.Label(status_frame, text="Caricamento...", 
-                                               font=('Arial', 10), fg='blue')
-        self.encryption_status_label.pack(pady=10)
+        self.encryption_status_label = QLabel("Caricamento...")
+        self.encryption_status_label.setFont(QFont('Arial', 10))
+        self.encryption_status_label.setStyleSheet("color: blue;")
+        self.encryption_status_label.setAlignment(Qt.AlignCenter)
+        status_layout.addWidget(self.encryption_status_label)
         
-        tk.Button(status_frame, text="Aggiorna Stato", command=self.update_security_status,
-                 bg='#2196F3', fg='white').pack(pady=5)
+        update_status_btn = QPushButton("Aggiorna Stato")
+        update_status_btn.clicked.connect(self.update_security_status)
+        update_status_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #2196F3;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 8px;
+            }
+            QPushButton:hover { background-color: #1976D2; }
+        """)
+        status_layout.addWidget(update_status_btn)
+        
+        layout.addWidget(status_group)
         
         # Crittografia
-        encrypt_frame = tk.LabelFrame(parent, text="Cripta PDF")
-        encrypt_frame.pack(fill='x', padx=10, pady=5)
+        encrypt_group = QGroupBox("Cripta PDF")
+        encrypt_layout = QVBoxLayout(encrypt_group)
         
-        tk.Label(encrypt_frame, text="Password Utente:").pack(anchor='w', padx=5)
-        self.user_password_entry = tk.Entry(encrypt_frame, show='*', width=40)
-        self.user_password_entry.pack(padx=5, pady=2)
+        encrypt_layout.addWidget(QLabel("Password Utente:"))
+        self.user_password_entry = QLineEdit()
+        self.user_password_entry.setEchoMode(QLineEdit.Password)
+        encrypt_layout.addWidget(self.user_password_entry)
         
-        tk.Label(encrypt_frame, text="Password Proprietario (opzionale):").pack(anchor='w', padx=5)
-        self.owner_password_entry = tk.Entry(encrypt_frame, show='*', width=40)
-        self.owner_password_entry.pack(padx=5, pady=2)
+        encrypt_layout.addWidget(QLabel("Password Proprietario (opzionale):"))
+        self.owner_password_entry = QLineEdit()
+        self.owner_password_entry.setEchoMode(QLineEdit.Password)
+        encrypt_layout.addWidget(self.owner_password_entry)
         
-        tk.Button(encrypt_frame, text="Cripta PDF", command=self.encrypt_pdf,
-                 bg='#4CAF50', fg='white', font=('Arial', 10, 'bold')).pack(pady=10)
+        encrypt_btn = QPushButton("Cripta PDF")
+        encrypt_btn.clicked.connect(self.encrypt_pdf)
+        encrypt_btn.setFont(QFont('Arial', 10, QFont.Bold))
+        encrypt_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 10px;
+            }
+            QPushButton:hover { background-color: #45a049; }
+        """)
+        encrypt_layout.addWidget(encrypt_btn)
+        
+        layout.addWidget(encrypt_group)
         
         # Decrittografia
-        decrypt_frame = tk.LabelFrame(parent, text="Decripta PDF")
-        decrypt_frame.pack(fill='x', padx=10, pady=5)
+        decrypt_group = QGroupBox("Decripta PDF")
+        decrypt_layout = QVBoxLayout(decrypt_group)
         
-        tk.Label(decrypt_frame, text="Password:").pack(anchor='w', padx=5)
-        self.decrypt_password_entry = tk.Entry(decrypt_frame, show='*', width=40)
-        self.decrypt_password_entry.pack(padx=5, pady=2)
+        decrypt_layout.addWidget(QLabel("Password:"))
+        self.decrypt_password_entry = QLineEdit()
+        self.decrypt_password_entry.setEchoMode(QLineEdit.Password)
+        decrypt_layout.addWidget(self.decrypt_password_entry)
         
-        tk.Button(decrypt_frame, text="Decripta PDF", command=self.decrypt_pdf,
-                 bg='#FF9800', fg='white', font=('Arial', 10, 'bold')).pack(pady=10)
+        decrypt_btn = QPushButton("Decripta PDF")
+        decrypt_btn.clicked.connect(self.decrypt_pdf)
+        decrypt_btn.setFont(QFont('Arial', 10, QFont.Bold))
+        decrypt_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #FF9800;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 10px;
+            }
+            QPushButton:hover { background-color: #F57C00; }
+        """)
+        decrypt_layout.addWidget(decrypt_btn)
+        
+        layout.addWidget(decrypt_group)
+        layout.addStretch()
     
     def setup_permissions_tab(self, parent):
         """Configura il tab permessi"""
-        permissions_frame = tk.LabelFrame(parent, text="Permessi Documento")
-        permissions_frame.pack(fill='both', expand=True, padx=10, pady=5)
+        layout = QVBoxLayout(parent)
         
-        # Variabili per i permessi
-        self.perms = {
-            'print': tk.BooleanVar(),
-            'copy': tk.BooleanVar(),
-            'edit': tk.BooleanVar(),
-            'annotate': tk.BooleanVar(),
-            'form_fill': tk.BooleanVar(),
-            'accessibility': tk.BooleanVar(),
-            'assemble': tk.BooleanVar(),
-            'print_hq': tk.BooleanVar()
-        }
+        permissions_group = QGroupBox("Permessi Documento")
+        permissions_layout = QVBoxLayout(permissions_group)
         
         # Checkboxes per i permessi
+        self.perms = {}
         permissions_list = [
             ('print', 'Stampa documento'),
             ('copy', 'Copia testo e immagini'),
@@ -443,110 +492,218 @@ class SecurityGUI:
         ]
         
         for perm_key, perm_text in permissions_list:
-            tk.Checkbutton(permissions_frame, text=perm_text, 
-                          variable=self.perms[perm_key]).pack(anchor='w', padx=10, pady=2)
+            checkbox = QCheckBox(perm_text)
+            self.perms[perm_key] = checkbox
+            permissions_layout.addWidget(checkbox)
+        
+        layout.addWidget(permissions_group)
         
         # Pulsanti azione
-        perm_buttons_frame = tk.Frame(permissions_frame)
-        perm_buttons_frame.pack(fill='x', pady=10)
+        buttons_layout = QHBoxLayout()
         
-        tk.Button(perm_buttons_frame, text="Applica Permessi", command=self.apply_permissions,
-                 bg='#4CAF50', fg='white').pack(side='left', padx=10)
+        apply_btn = QPushButton("Applica Permessi")
+        apply_btn.clicked.connect(self.apply_permissions)
+        apply_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 8px;
+            }
+            QPushButton:hover { background-color: #45a049; }
+        """)
+        buttons_layout.addWidget(apply_btn)
         
-        tk.Button(perm_buttons_frame, text="Seleziona Tutti", command=self.select_all_permissions,
-                 bg='#2196F3', fg='white').pack(side='left', padx=5)
+        select_all_btn = QPushButton("Seleziona Tutti")
+        select_all_btn.clicked.connect(self.select_all_permissions)
+        select_all_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #2196F3;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 8px;
+            }
+            QPushButton:hover { background-color: #1976D2; }
+        """)
+        buttons_layout.addWidget(select_all_btn)
         
-        tk.Button(perm_buttons_frame, text="Deseleziona Tutti", command=self.deselect_all_permissions,
-                 bg='#F44336', fg='white').pack(side='left', padx=5)
+        deselect_all_btn = QPushButton("Deseleziona Tutti")
+        deselect_all_btn.clicked.connect(self.deselect_all_permissions)
+        deselect_all_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #F44336;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 8px;
+            }
+            QPushButton:hover { background-color: #D32F2F; }
+        """)
+        buttons_layout.addWidget(deselect_all_btn)
+        
+        layout.addLayout(buttons_layout)
+        layout.addStretch()
     
     def setup_signature_tab(self, parent):
         """Configura il tab firma digitale"""
+        layout = QVBoxLayout(parent)
+        
         # Genera chiavi
-        keys_frame = tk.LabelFrame(parent, text="Genera Chiavi Digitali")
-        keys_frame.pack(fill='x', padx=10, pady=5)
+        keys_group = QGroupBox("Genera Chiavi Digitali")
+        keys_layout = QVBoxLayout(keys_group)
         
-        tk.Label(keys_frame, text="Dimensione chiave:").pack(anchor='w', padx=5)
-        self.key_size_var = tk.StringVar(value="2048")
-        key_size_combo = ttk.Combobox(keys_frame, textvariable=self.key_size_var, 
-                                     values=["1024", "2048", "4096"], state="readonly")
-        key_size_combo.pack(padx=5, pady=2)
+        keys_layout.addWidget(QLabel("Dimensione chiave:"))
+        self.key_size_combo = QComboBox()
+        self.key_size_combo.addItems(["1024", "2048", "4096"])
+        self.key_size_combo.setCurrentText("2048")
+        keys_layout.addWidget(self.key_size_combo)
         
-        tk.Button(keys_frame, text="Genera Chiavi", command=self.generate_keys,
-                 bg='#9C27B0', fg='white').pack(pady=5)
+        generate_keys_btn = QPushButton("Genera Chiavi")
+        generate_keys_btn.clicked.connect(self.generate_keys)
+        generate_keys_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #9C27B0;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 8px;
+            }
+            QPushButton:hover { background-color: #7B1FA2; }
+        """)
+        keys_layout.addWidget(generate_keys_btn)
+        
+        layout.addWidget(keys_group)
         
         # Campo firma
-        signature_frame = tk.LabelFrame(parent, text="Aggiungi Firma")
-        signature_frame.pack(fill='x', padx=10, pady=5)
+        signature_group = QGroupBox("Aggiungi Firma")
+        signature_layout = QVBoxLayout(signature_group)
         
-        tk.Label(signature_frame, text="Nome campo firma:").pack(anchor='w', padx=5)
-        self.signature_field_entry = tk.Entry(signature_frame, width=40)
-        self.signature_field_entry.pack(padx=5, pady=2)
+        signature_layout.addWidget(QLabel("Nome campo firma:"))
+        self.signature_field_entry = QLineEdit()
+        signature_layout.addWidget(self.signature_field_entry)
         
-        tk.Button(signature_frame, text="Firma Documento", command=self.sign_document,
-                 bg='#4CAF50', fg='white', font=('Arial', 10, 'bold')).pack(pady=10)
+        sign_btn = QPushButton("Firma Documento")
+        sign_btn.clicked.connect(self.sign_document)
+        sign_btn.setFont(QFont('Arial', 10, QFont.Bold))
+        sign_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 10px;
+            }
+            QPushButton:hover { background-color: #45a049; }
+        """)
+        signature_layout.addWidget(sign_btn)
+        
+        layout.addWidget(signature_group)
         
         # Info firma
-        info_frame = tk.LabelFrame(parent, text="Informazioni Firma")
-        info_frame.pack(fill='both', expand=True, padx=10, pady=5)
+        info_group = QGroupBox("Informazioni Firma")
+        info_layout = QVBoxLayout(info_group)
         
-        self.signature_info_text = tk.Text(info_frame, height=6, width=50)
-        sig_scrollbar = tk.Scrollbar(info_frame, orient='vertical', 
-                                   command=self.signature_info_text.yview)
-        self.signature_info_text.configure(yscrollcommand=sig_scrollbar.set)
+        self.signature_info_text = QTextEdit()
+        self.signature_info_text.setReadOnly(True)
+        self.signature_info_text.setMinimumHeight(120)
+        info_layout.addWidget(self.signature_info_text)
         
-        self.signature_info_text.pack(side='left', fill='both', expand=True, padx=5, pady=5)
-        sig_scrollbar.pack(side='right', fill='y', pady=5)
+        layout.addWidget(info_group)
+        layout.addStretch()
     
     def setup_advanced_tab(self, parent):
         """Configura il tab funzioni avanzate"""
+        layout = QVBoxLayout(parent)
+        
         # Watermark sicurezza
-        watermark_frame = tk.LabelFrame(parent, text="Watermark Sicurezza")
-        watermark_frame.pack(fill='x', padx=10, pady=5)
+        watermark_group = QGroupBox("Watermark Sicurezza")
+        watermark_layout = QVBoxLayout(watermark_group)
         
-        tk.Label(watermark_frame, text="Testo watermark:").pack(anchor='w', padx=5)
-        self.watermark_entry = tk.Entry(watermark_frame, width=40)
-        self.watermark_entry.insert(0, "CONFIDENTIAL")
-        self.watermark_entry.pack(padx=5, pady=2)
+        watermark_layout.addWidget(QLabel("Testo watermark:"))
+        self.watermark_entry = QLineEdit("CONFIDENTIAL")
+        watermark_layout.addWidget(self.watermark_entry)
         
-        tk.Button(watermark_frame, text="Aggiungi Watermark", command=self.add_security_watermark,
-                 bg='#FF5722', fg='white').pack(pady=5)
+        add_watermark_btn = QPushButton("Aggiungi Watermark")
+        add_watermark_btn.clicked.connect(self.add_security_watermark)
+        add_watermark_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #FF5722;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 8px;
+            }
+            QPushButton:hover { background-color: #E64A19; }
+        """)
+        watermark_layout.addWidget(add_watermark_btn)
+        
+        layout.addWidget(watermark_group)
         
         # Timbri sicurezza
-        stamp_frame = tk.LabelFrame(parent, text="Timbri Sicurezza")
-        stamp_frame.pack(fill='x', padx=10, pady=5)
+        stamp_group = QGroupBox("Timbri Sicurezza")
+        stamp_layout = QVBoxLayout(stamp_group)
         
-        stamp_controls = tk.Frame(stamp_frame)
-        stamp_controls.pack(fill='x', padx=5, pady=5)
+        stamp_controls_layout = QHBoxLayout()
+        stamp_controls_layout.addWidget(QLabel("Testo:"))
+        self.stamp_text_entry = QLineEdit("CONFIDENTIAL")
+        stamp_controls_layout.addWidget(self.stamp_text_entry)
         
-        tk.Label(stamp_controls, text="Testo:").pack(side='left')
-        self.stamp_text_entry = tk.Entry(stamp_controls, width=20)
-        self.stamp_text_entry.insert(0, "CONFIDENTIAL")
-        self.stamp_text_entry.pack(side='left', padx=5)
+        stamp_controls_layout.addWidget(QLabel("Posizione:"))
+        self.stamp_position_combo = QComboBox()
+        self.stamp_position_combo.addItems(["top-right", "top-left", "bottom-right", "bottom-left", "center"])
+        stamp_controls_layout.addWidget(self.stamp_position_combo)
         
-        tk.Label(stamp_controls, text="Posizione:").pack(side='left', padx=(10,0))
-        self.stamp_position = tk.StringVar(value="top-right")
-        position_combo = ttk.Combobox(stamp_controls, textvariable=self.stamp_position,
-                                    values=["top-right", "top-left", "bottom-right", "bottom-left", "center"],
-                                    state="readonly", width=12)
-        position_combo.pack(side='left', padx=5)
+        stamp_layout.addLayout(stamp_controls_layout)
         
-        tk.Button(stamp_frame, text="Aggiungi Timbro", command=self.add_security_stamp,
-                 bg='#795548', fg='white').pack(pady=5)
+        add_stamp_btn = QPushButton("Aggiungi Timbro")
+        add_stamp_btn.clicked.connect(self.add_security_stamp)
+        add_stamp_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #795548;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 8px;
+            }
+            QPushButton:hover { background-color: #5D4037; }
+        """)
+        stamp_layout.addWidget(add_stamp_btn)
+        
+        layout.addWidget(stamp_group)
         
         # Pulizia metadati
-        metadata_frame = tk.LabelFrame(parent, text="Pulizia Documento")
-        metadata_frame.pack(fill='x', padx=10, pady=5)
+        metadata_group = QGroupBox("Pulizia Documento")
+        metadata_layout = QVBoxLayout(metadata_group)
         
-        tk.Button(metadata_frame, text="Rimuovi Metadati", command=self.remove_metadata,
-                 bg='#607D8B', fg='white').pack(pady=10)
+        remove_metadata_btn = QPushButton("Rimuovi Metadati")
+        remove_metadata_btn.clicked.connect(self.remove_metadata)
+        remove_metadata_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #607D8B;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 10px;
+            }
+            QPushButton:hover { background-color: #455A64; }
+        """)
+        metadata_layout.addWidget(remove_metadata_btn)
         
-        tk.Label(metadata_frame, text="Rimuove informazioni sensibili come autore, data creazione, ecc.",
-                font=('Arial', 8), fg='gray').pack()
+        info_label = QLabel("Rimuove informazioni sensibili come autore, data creazione, ecc.")
+        info_label.setFont(QFont('Arial', 8))
+        info_label.setStyleSheet("color: gray;")
+        metadata_layout.addWidget(info_label)
+        
+        layout.addWidget(metadata_group)
+        layout.addStretch()
     
     def update_security_status(self):
         """Aggiorna lo stato della sicurezza"""
         if not self.pdf_editor.current_doc:
-            self.encryption_status_label.config(text="Nessun PDF aperto", fg='red')
+            self.encryption_status_label.setText("Nessun PDF aperto")
+            self.encryption_status_label.setStyleSheet("color: red;")
             return
             
         security_info = self.security.get_pdf_security_info()
@@ -563,171 +720,185 @@ class SecurityGUI:
                 status_text = "PDF NON CRITTOGRAFATO"
                 color = 'red'
                 
-            self.encryption_status_label.config(text=status_text, fg=color)
+            self.encryption_status_label.setText(status_text)
+            self.encryption_status_label.setStyleSheet(f"color: {color};")
             
             # Aggiorna i checkboxes dei permessi
             if security_info['authenticated'] and security_info['permissions']:
-                for perm_key, perm_var in self.perms.items():
-                    perm_var.set(security_info['permissions'].get(perm_key, False))
+                for perm_key, checkbox in self.perms.items():
+                    checkbox.setChecked(security_info['permissions'].get(perm_key, False))
         else:
-            self.encryption_status_label.config(text="Errore nel recupero info sicurezza", fg='red')
+            self.encryption_status_label.setText("Errore nel recupero info sicurezza")
+            self.encryption_status_label.setStyleSheet("color: red;")
     
     def encrypt_pdf(self):
         """Cripta il PDF"""
-        user_password = self.user_password_entry.get()
-        owner_password = self.owner_password_entry.get()
+        user_password = self.user_password_entry.text()
+        owner_password = self.owner_password_entry.text()
         
         if not user_password:
-            messagebox.showwarning("Attenzione", "Inserisci almeno la password utente")
+            QMessageBox.warning(self.security_window, "Attenzione", "Inserisci almeno la password utente")
             return
         
         success, message = self.security.encrypt_pdf(user_password, owner_password)
         
         if success:
-            messagebox.showinfo("Successo", message)
+            QMessageBox.information(self.security_window, "Successo", message)
             self.update_security_status()
         else:
-            messagebox.showerror("Errore", message)
+            QMessageBox.critical(self.security_window, "Errore", message)
     
     def decrypt_pdf(self):
         """Decripta il PDF"""
-        password = self.decrypt_password_entry.get()
+        password = self.decrypt_password_entry.text()
         
         if not password:
-            messagebox.showwarning("Attenzione", "Inserisci la password")
+            QMessageBox.warning(self.security_window, "Attenzione", "Inserisci la password")
             return
         
         success, message = self.security.decrypt_pdf(password)
         
         if success:
-            messagebox.showinfo("Successo", message)
+            QMessageBox.information(self.security_window, "Successo", message)
             self.update_security_status()
         else:
-            messagebox.showerror("Errore", message)
+            QMessageBox.critical(self.security_window, "Errore", message)
     
     def apply_permissions(self):
         """Applica i permessi selezionati"""
-        permissions_dict = {key: var.get() for key, var in self.perms.items()}
+        permissions_dict = {key: checkbox.isChecked() for key, checkbox in self.perms.items()}
         
         success, message = self.security.set_pdf_permissions(permissions_dict)
         
         if success:
-            messagebox.showinfo("Successo", message)
+            QMessageBox.information(self.security_window, "Successo", message)
         else:
-            messagebox.showerror("Errore", message)
+            QMessageBox.critical(self.security_window, "Errore", message)
     
     def select_all_permissions(self):
         """Seleziona tutti i permessi"""
-        for var in self.perms.values():
-            var.set(True)
+        for checkbox in self.perms.values():
+            checkbox.setChecked(True)
     
     def deselect_all_permissions(self):
         """Deseleziona tutti i permessi"""
-        for var in self.perms.values():
-            var.set(False)
+        for checkbox in self.perms.values():
+            checkbox.setChecked(False)
     
     def generate_keys(self):
         """Genera coppia di chiavi"""
-        key_size = int(self.key_size_var.get())
+        key_size = int(self.key_size_combo.currentText())
         
         private_key, public_key = self.security.generate_key_pair(key_size)
         
         if private_key and public_key:
             # Chiedi dove salvare le chiavi
-            private_key_path = filedialog.asksaveasfilename(
-                title="Salva chiave privata",
-                defaultextension=".pem",
-                filetypes=[("PEM files", "*.pem")]
+            private_key_path, _ = QFileDialog.getSaveFileName(
+                self.security_window,
+                "Salva chiave privata",
+                "",
+                "PEM files (*.pem)"
             )
             
             if private_key_path:
                 public_key_path = private_key_path.replace('.pem', '_public.pem')
                 
                 # Chiedi password per proteggere la chiave privata
-                key_password = simpledialog.askstring("Password Chiave", 
-                                                     "Password per proteggere la chiave privata (opzionale):",
-                                                     show='*')
+                key_password, ok = QInputDialog.getText(
+                    self.security_window,
+                    "Password Chiave",
+                    "Password per proteggere la chiave privata (opzionale):",
+                    QLineEdit.Password
+                )
                 
-                if self.security.save_keys(private_key, public_key, 
-                                         private_key_path, public_key_path, key_password):
-                    messagebox.showinfo("Successo", 
-                                      f"Chiavi salvate:\n"
-                                      f"Privata: {private_key_path}\n"
-                                      f"Pubblica: {public_key_path}")
-                else:
-                    messagebox.showerror("Errore", "Errore nel salvataggio delle chiavi")
+                if ok:
+                    if self.security.save_keys(private_key, public_key, 
+                                             private_key_path, public_key_path, key_password if key_password else None):
+                        QMessageBox.information(self.security_window, "Successo", 
+                                          f"Chiavi salvate:\n"
+                                          f"Privata: {private_key_path}\n"
+                                          f"Pubblica: {public_key_path}")
+                    else:
+                        QMessageBox.critical(self.security_window, "Errore", "Errore nel salvataggio delle chiavi")
         else:
-            messagebox.showerror("Errore", "Errore nella generazione delle chiavi")
+            QMessageBox.critical(self.security_window, "Errore", "Errore nella generazione delle chiavi")
     
     def sign_document(self):
         """Firma il documento"""
-        field_name = self.signature_field_entry.get().strip()
+        field_name = self.signature_field_entry.text().strip()
         
         if not field_name:
-            messagebox.showwarning("Attenzione", "Inserisci il nome del campo firma")
+            QMessageBox.warning(self.security_window, "Attenzione", "Inserisci il nome del campo firma")
             return
         
         success, message = self.security.add_digital_signature(field_name)
         
         if success:
-            messagebox.showinfo("Successo", message)
+            QMessageBox.information(self.security_window, "Successo", message)
             # Aggiorna info firma
-            self.signature_info_text.delete('1.0', 'end')
-            self.signature_info_text.insert('1.0', 
+            self.signature_info_text.clear()
+            self.signature_info_text.append(
                 f"Documento firmato digitalmente\n"
                 f"Campo: {field_name}\n"
                 f"Data: {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}\n"
                 f"Nota: Questa è una firma simulata per scopi dimostrativi")
         else:
-            messagebox.showerror("Errore", message)
+            QMessageBox.critical(self.security_window, "Errore", message)
     
     def add_security_watermark(self):
         """Aggiunge watermark di sicurezza"""
-        watermark_text = self.watermark_entry.get().strip()
+        watermark_text = self.watermark_entry.text().strip()
         
         if not watermark_text:
-            messagebox.showwarning("Attenzione", "Inserisci il testo del watermark")
+            QMessageBox.warning(self.security_window, "Attenzione", "Inserisci il testo del watermark")
             return
         
         success, message = self.security.create_watermark_security(watermark_text)
         
         if success:
-            messagebox.showinfo("Successo", message)
+            QMessageBox.information(self.security_window, "Successo", message)
         else:
-            messagebox.showerror("Errore", message)
+            QMessageBox.critical(self.security_window, "Errore", message)
     
     def add_security_stamp(self):
         """Aggiunge timbro di sicurezza"""
-        stamp_text = self.stamp_text_entry.get().strip()
-        position = self.stamp_position.get()
+        stamp_text = self.stamp_text_entry.text().strip()
+        position = self.stamp_position_combo.currentText()
         
         if not stamp_text:
-            messagebox.showwarning("Attenzione", "Inserisci il testo del timbro")
+            QMessageBox.warning(self.security_window, "Attenzione", "Inserisci il testo del timbro")
             return
         
         page_num = self.pdf_editor.page_num
         success, message = self.security.add_security_stamp(page_num, stamp_text, position)
         
         if success:
-            messagebox.showinfo("Successo", message)
+            QMessageBox.information(self.security_window, "Successo", message)
         else:
-            messagebox.showerror("Errore", message)
+            QMessageBox.critical(self.security_window, "Errore", message)
     
     def remove_metadata(self):
         """Rimuove metadati sensibili"""
-        if not messagebox.askyesno("Conferma", 
-                                  "Rimuovere tutti i metadati del documento?\n"
-                                  "Questa operazione non può essere annullata."):
+        reply = QMessageBox.question(
+            self.security_window,
+            "Conferma",
+            "Rimuovere tutti i metadati del documento?\n"
+            "Questa operazione non può essere annullata.",
+            QMessageBox.Yes | QMessageBox.No
+        )
+        
+        if reply != QMessageBox.Yes:
             return
         
         success, message = self.security.remove_metadata()
         
         if success:
-            messagebox.showinfo("Successo", message)
+            QMessageBox.information(self.security_window, "Successo", message)
         else:
-            messagebox.showerror("Errore", message)
+            QMessageBox.critical(self.security_window, "Errore", message)
     
     def close_security_panel(self):
         """Chiude il pannello sicurezza"""
-        self.security_window.destroy()
-        self.security_window = None
+        if self.security_window:
+            self.security_window.close()
+            self.security_window = None
