@@ -1,30 +1,35 @@
-import tkinter as tk
-from tkinter import ttk, filedialog, messagebox, colorchooser, simpledialog
-from PIL import Image, ImageTk
+from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
+                               QLabel, QPushButton, QFileDialog, QMessageBox, QFrame,
+                               QListWidget, QSpinBox, QRadioButton, QButtonGroup,
+                               QGroupBox, QScrollArea, QColorDialog, QInputDialog,
+                               QMenuBar, QMenu, QToolBar, QSplitter)
+from PySide6.QtCore import Qt, QPoint, QRect as QtRect, Signal
+from PySide6.QtGui import QPixmap, QImage, QPainter, QPen, QColor, QFont, QAction
+from PIL import Image
 import io
 import os
 from advanced_pdf_editor import AdvancedPDFEditor
 import fitz
 
-class AcrobatLikeGUI:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("PDF Editor Pro - Advanced PDF Editor")
-        self.root.geometry("1200x800")
-        self.root.configure(bg='#f0f0f0')
+class AcrobatLikeGUI(QMainWindow):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("PDF Editor Pro - Advanced PDF Editor")
+        self.resize(1200, 800)
+        self.setStyleSheet("background-color: #f0f0f0;")
         
         # Editor PDF avanzato
         self.pdf_editor = AdvancedPDFEditor()
         
         # Variabili di stato
-        self.current_tool = tk.StringVar(value="select")
-        self.current_color = (0, 0, 1)  # Blu default
-        self.line_width = tk.IntVar(value=2)
-        self.font_size = tk.IntVar(value=12)
+        self.current_tool = "select"
+        self.current_color = QColor(0, 0, 255)  # Blu default
+        self.line_width = 2
+        self.font_size = 12
         
         # Canvas per il disegno
-        self.canvas = None
-        self.canvas_image = None
+        self.canvas_label = None
+        self.canvas_pixmap = None
         self.drawing = False
         self.draw_start_x = 0
         self.draw_start_y = 0
@@ -40,23 +45,36 @@ class AcrobatLikeGUI:
         # Toolbar principale
         self.create_main_toolbar()
         
-        # Frame principale con pannelli
-        self.main_frame = tk.Frame(self.root, bg='#f0f0f0')
-        self.main_frame.pack(fill='both', expand=True)
+        # Widget centrale
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+        main_layout = QHBoxLayout(central_widget)
+        main_layout.setContentsMargins(5, 5, 5, 5)
+        
+        # Splitter per pannelli ridimensionabili
+        splitter = QSplitter(Qt.Horizontal)
         
         # Pannello sinistro (navigazione e strumenti)
-        self.left_panel = tk.Frame(self.main_frame, width=250, bg='#e8e8e8')
-        self.left_panel.pack(side='left', fill='y', padx=5, pady=5)
-        self.left_panel.pack_propagate(False)
+        self.left_panel = QWidget()
+        self.left_panel.setFixedWidth(250)
+        self.left_panel.setStyleSheet("background-color: #e8e8e8;")
+        splitter.addWidget(self.left_panel)
         
         # Area centrale (visualizzazione PDF)
-        self.center_panel = tk.Frame(self.main_frame, bg='white')
-        self.center_panel.pack(side='left', fill='both', expand=True, padx=5, pady=5)
+        self.center_panel = QWidget()
+        self.center_panel.setStyleSheet("background-color: white;")
+        splitter.addWidget(self.center_panel)
         
         # Pannello destro (proprietà e commenti)
-        self.right_panel = tk.Frame(self.main_frame, width=250, bg='#e8e8e8')
-        self.right_panel.pack(side='right', fill='y', padx=5, pady=5)
-        self.right_panel.pack_propagate(False)
+        self.right_panel = QWidget()
+        self.right_panel.setFixedWidth(250)
+        self.right_panel.setStyleSheet("background-color: #e8e8e8;")
+        splitter.addWidget(self.right_panel)
+        
+        # Imposta dimensioni iniziali del splitter
+        splitter.setSizes([250, 700, 250])
+        
+        main_layout.addWidget(splitter)
         
         # Configura i pannelli
         self.setup_left_panel()
@@ -68,125 +86,205 @@ class AcrobatLikeGUI:
         
     def create_menu_bar(self):
         """Crea la barra dei menu"""
-        menubar = tk.Menu(self.root)
-        self.root.config(menu=menubar)
+        menubar = self.menuBar()
         
         # Menu File
-        file_menu = tk.Menu(menubar, tearoff=0)
-        menubar.add_cascade(label="File", menu=file_menu)
-        file_menu.add_command(label="Apri PDF", command=self.open_pdf)
-        file_menu.add_command(label="Salva", command=self.save_pdf)
-        file_menu.add_command(label="Salva come...", command=self.save_pdf_as)
-        file_menu.add_separator()
-        file_menu.add_command(label="Esci", command=self.root.quit)
+        file_menu = menubar.addMenu("File")
+        
+        open_action = QAction("Apri PDF", self)
+        open_action.triggered.connect(self.open_pdf)
+        file_menu.addAction(open_action)
+        
+        save_action = QAction("Salva", self)
+        save_action.triggered.connect(self.save_pdf)
+        file_menu.addAction(save_action)
+        
+        save_as_action = QAction("Salva come...", self)
+        save_as_action.triggered.connect(self.save_pdf_as)
+        file_menu.addAction(save_as_action)
+        
+        file_menu.addSeparator()
+        
+        exit_action = QAction("Esci", self)
+        exit_action.triggered.connect(self.close)
+        file_menu.addAction(exit_action)
         
         # Menu Modifica
-        edit_menu = tk.Menu(menubar, tearoff=0)
-        menubar.add_cascade(label="Modifica", menu=edit_menu)
-        edit_menu.add_command(label="Annulla", command=self.undo)
-        edit_menu.add_command(label="Ripeti", command=self.redo)
-        edit_menu.add_separator()
-        edit_menu.add_command(label="Copia", command=self.copy)
-        edit_menu.add_command(label="Incolla", command=self.paste)
+        edit_menu = menubar.addMenu("Modifica")
+        
+        undo_action = QAction("Annulla", self)
+        undo_action.triggered.connect(self.undo)
+        edit_menu.addAction(undo_action)
+        
+        redo_action = QAction("Ripeti", self)
+        redo_action.triggered.connect(self.redo)
+        edit_menu.addAction(redo_action)
+        
+        edit_menu.addSeparator()
+        
+        copy_action = QAction("Copia", self)
+        copy_action.triggered.connect(self.copy)
+        edit_menu.addAction(copy_action)
+        
+        paste_action = QAction("Incolla", self)
+        paste_action.triggered.connect(self.paste)
+        edit_menu.addAction(paste_action)
         
         # Menu Visualizza
-        view_menu = tk.Menu(menubar, tearoff=0)
-        menubar.add_cascade(label="Visualizza", menu=view_menu)
-        view_menu.add_command(label="Zoom In", command=self.zoom_in)
-        view_menu.add_command(label="Zoom Out", command=self.zoom_out)
-        view_menu.add_command(label="Adatta alla finestra", command=self.fit_to_window)
+        view_menu = menubar.addMenu("Visualizza")
+        
+        zoom_in_action = QAction("Zoom In", self)
+        zoom_in_action.triggered.connect(self.zoom_in)
+        view_menu.addAction(zoom_in_action)
+        
+        zoom_out_action = QAction("Zoom Out", self)
+        zoom_out_action.triggered.connect(self.zoom_out)
+        view_menu.addAction(zoom_out_action)
+        
+        fit_window_action = QAction("Adatta alla finestra", self)
+        fit_window_action.triggered.connect(self.fit_to_window)
+        view_menu.addAction(fit_window_action)
         
         # Menu Strumenti
-        tools_menu = tk.Menu(menubar, tearoff=0)
-        menubar.add_cascade(label="Strumenti", menu=tools_menu)
-        tools_menu.add_command(label="Aggiungi testo", command=lambda: self.set_tool("text"))
-        tools_menu.add_command(label="Evidenziatore", command=lambda: self.set_tool("highlight"))
-        tools_menu.add_command(label="Note adesive", command=lambda: self.set_tool("note"))
-        tools_menu.add_command(label="Disegno libero", command=lambda: self.set_tool("freehand"))
+        tools_menu = menubar.addMenu("Strumenti")
+        
+        text_action = QAction("Aggiungi testo", self)
+        text_action.triggered.connect(lambda: self.set_tool("text"))
+        tools_menu.addAction(text_action)
+        
+        highlight_action = QAction("Evidenziatore", self)
+        highlight_action.triggered.connect(lambda: self.set_tool("highlight"))
+        tools_menu.addAction(highlight_action)
+        
+        note_action = QAction("Note adesive", self)
+        note_action.triggered.connect(lambda: self.set_tool("note"))
+        tools_menu.addAction(note_action)
+        
+        freehand_action = QAction("Disegno libero", self)
+        freehand_action.triggered.connect(lambda: self.set_tool("freehand"))
+        tools_menu.addAction(freehand_action)
         
     def create_main_toolbar(self):
         """Crea la toolbar principale"""
-        toolbar = tk.Frame(self.root, bg='#d0d0d0', height=50)
-        toolbar.pack(fill='x', side='top')
-        toolbar.pack_propagate(False)
+        toolbar = QToolBar("Main Toolbar")
+        toolbar.setMovable(False)
+        toolbar.setStyleSheet("background-color: #d0d0d0; padding: 5px;")
+        self.addToolBar(toolbar)
         
-        # Pulsanti toolbar
-        buttons = [
-            ("Apri", self.open_pdf, "📁"),
-            ("Salva", self.save_pdf, "💾"),
-            ("|", None, None),  # Separatore
-            ("Seleziona", lambda: self.set_tool("select"), "🔍"),
-            ("Testo", lambda: self.set_tool("text"), "T"),
-            ("Evidenzia", lambda: self.set_tool("highlight"), "🖍️"),
-            ("Nota", lambda: self.set_tool("note"), "📝"),
-            ("Rettangolo", lambda: self.set_tool("rectangle"), "⬜"),
-            ("Cerchio", lambda: self.set_tool("circle"), "⭕"),
-            ("Linea", lambda: self.set_tool("line"), "📏"),
-            ("Freccia", lambda: self.set_tool("arrow"), "➡️"),
-            ("Disegno", lambda: self.set_tool("freehand"), "✏️"),
-            ("|", None, None),  # Separatore
-            ("Zoom In", self.zoom_in, "🔍+"),
-            ("Zoom Out", self.zoom_out, "🔍-"),
-        ]
+        # Pulsanti principali
+        open_action = QAction("📁 Apri", self)
+        open_action.triggered.connect(self.open_pdf)
+        toolbar.addAction(open_action)
         
-        for i, (text, command, icon) in enumerate(buttons):
-            if text == "|":
-                separator = tk.Frame(toolbar, width=2, bg='#a0a0a0')
-                separator.pack(side='left', fill='y', padx=5, pady=5)
-            else:
-                btn = tk.Button(toolbar, text=f"{icon}\\n{text}", command=command,
-                               width=8, height=2, font=('Arial', 8),
-                               relief='raised', bd=1)
-                btn.pack(side='left', padx=2, pady=5)
+        save_action = QAction("💾 Salva", self)
+        save_action.triggered.connect(self.save_pdf)
+        toolbar.addAction(save_action)
+        
+        toolbar.addSeparator()
+        
+        # Strumenti
+        select_action = QAction("🔍 Seleziona", self)
+        select_action.triggered.connect(lambda: self.set_tool("select"))
+        toolbar.addAction(select_action)
+        
+        text_action = QAction("T Testo", self)
+        text_action.triggered.connect(lambda: self.set_tool("text"))
+        toolbar.addAction(text_action)
+        
+        highlight_action = QAction("🖍️ Evidenzia", self)
+        highlight_action.triggered.connect(lambda: self.set_tool("highlight"))
+        toolbar.addAction(highlight_action)
+        
+        note_action = QAction("📝 Nota", self)
+        note_action.triggered.connect(lambda: self.set_tool("note"))
+        toolbar.addAction(note_action)
+        
+        rect_action = QAction("⬜ Rettangolo", self)
+        rect_action.triggered.connect(lambda: self.set_tool("rectangle"))
+        toolbar.addAction(rect_action)
+        
+        circle_action = QAction("⭕ Cerchio", self)
+        circle_action.triggered.connect(lambda: self.set_tool("circle"))
+        toolbar.addAction(circle_action)
+        
+        toolbar.addSeparator()
+        
+        # Zoom
+        zoom_in_action = QAction("🔍+ Zoom In", self)
+        zoom_in_action.triggered.connect(self.zoom_in)
+        toolbar.addAction(zoom_in_action)
+        
+        zoom_out_action = QAction("🔍- Zoom Out", self)
+        zoom_out_action.triggered.connect(self.zoom_out)
+        toolbar.addAction(zoom_out_action)
+        
+        toolbar.addSeparator()
         
         # Controlli colore e spessore
-        color_frame = tk.Frame(toolbar, bg='#d0d0d0')
-        color_frame.pack(side='right', padx=10, pady=5)
+        color_label = QLabel("Colore:")
+        toolbar.addWidget(color_label)
         
-        tk.Label(color_frame, text="Colore:", bg='#d0d0d0').pack(side='left')
-        self.color_button = tk.Button(color_frame, width=3, height=1, 
-                                     bg='blue', command=self.choose_color)
-        self.color_button.pack(side='left', padx=5)
+        self.color_button = QPushButton()
+        self.color_button.setFixedSize(30, 20)
+        self.color_button.setStyleSheet("background-color: blue;")
+        self.color_button.clicked.connect(self.choose_color)
+        toolbar.addWidget(self.color_button)
         
-        tk.Label(color_frame, text="Spessore:", bg='#d0d0d0').pack(side='left', padx=(10,0))
-        width_spinbox = tk.Spinbox(color_frame, from_=1, to=10, width=5, 
-                                  textvariable=self.line_width)
-        width_spinbox.pack(side='left', padx=5)
+        width_label = QLabel("  Spessore:")
+        toolbar.addWidget(width_label)
+        
+        self.width_spinbox = QSpinBox()
+        self.width_spinbox.setRange(1, 10)
+        self.width_spinbox.setValue(2)
+        self.width_spinbox.valueChanged.connect(lambda v: setattr(self, 'line_width', v))
+        toolbar.addWidget(self.width_spinbox)
         
     def setup_left_panel(self):
         """Configura il pannello sinistro"""
+        layout = QVBoxLayout(self.left_panel)
+        
         # Titolo
-        title_label = tk.Label(self.left_panel, text="NAVIGAZIONE", 
-                              font=('Arial', 10, 'bold'), bg='#e8e8e8')
-        title_label.pack(pady=10)
+        title_label = QLabel("NAVIGAZIONE")
+        title_label.setFont(QFont('Arial', 10, QFont.Bold))
+        title_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title_label)
         
         # Controlli pagina
-        page_frame = tk.LabelFrame(self.left_panel, text="Pagina", bg='#e8e8e8')
-        page_frame.pack(fill='x', padx=10, pady=5)
+        page_group = QGroupBox("Pagina")
+        page_layout = QVBoxLayout(page_group)
         
-        nav_frame = tk.Frame(page_frame, bg='#e8e8e8')
-        nav_frame.pack(pady=5)
+        nav_layout = QHBoxLayout()
+        prev_btn = QPushButton("◀")
+        prev_btn.clicked.connect(self.prev_page)
+        prev_btn.setFixedWidth(40)
+        nav_layout.addWidget(prev_btn)
         
-        tk.Button(nav_frame, text="◀", command=self.prev_page, width=3).pack(side='left')
-        self.page_label = tk.Label(nav_frame, text="1 / 1", bg='#e8e8e8', width=8)
-        self.page_label.pack(side='left', padx=5)
-        tk.Button(nav_frame, text="▶", command=self.next_page, width=3).pack(side='left')
+        self.page_label = QLabel("1 / 1")
+        self.page_label.setAlignment(Qt.AlignCenter)
+        nav_layout.addWidget(self.page_label)
         
-        # Lista miniature (placeholder)
-        thumb_frame = tk.LabelFrame(self.left_panel, text="Miniature", bg='#e8e8e8')
-        thumb_frame.pack(fill='both', expand=True, padx=10, pady=5)
+        next_btn = QPushButton("▶")
+        next_btn.clicked.connect(self.next_page)
+        next_btn.setFixedWidth(40)
+        nav_layout.addWidget(next_btn)
         
-        self.thumb_listbox = tk.Listbox(thumb_frame, height=10)
-        thumb_scrollbar = tk.Scrollbar(thumb_frame, orient='vertical', 
-                                      command=self.thumb_listbox.yview)
-        self.thumb_listbox.configure(yscrollcommand=thumb_scrollbar.set)
+        page_layout.addLayout(nav_layout)
+        layout.addWidget(page_group)
         
-        self.thumb_listbox.pack(side='left', fill='both', expand=True)
-        thumb_scrollbar.pack(side='right', fill='y')
+        # Lista miniature
+        thumb_group = QGroupBox("Miniature")
+        thumb_layout = QVBoxLayout(thumb_group)
+        
+        self.thumb_listbox = QListWidget()
+        thumb_layout.addWidget(self.thumb_listbox)
+        
+        layout.addWidget(thumb_group, 1)  # Stretch factor 1
         
         # Strumenti rapidi
-        tools_frame = tk.LabelFrame(self.left_panel, text="Strumenti", bg='#e8e8e8')
-        tools_frame.pack(fill='x', padx=10, pady=5)
+        tools_group = QGroupBox("Strumenti")
+        tools_layout = QVBoxLayout(tools_group)
+        
+        self.tool_button_group = QButtonGroup()
         
         tool_buttons = [
             ("Seleziona", "select"),
@@ -197,117 +295,146 @@ class AcrobatLikeGUI:
         ]
         
         for text, tool in tool_buttons:
-            tk.Radiobutton(tools_frame, text=text, variable=self.current_tool, 
-                          value=tool, bg='#e8e8e8', 
-                          command=lambda t=tool: self.set_tool(t)).pack(anchor='w')
+            radio = QRadioButton(text)
+            radio.setProperty("tool", tool)
+            if tool == "select":
+                radio.setChecked(True)
+            radio.toggled.connect(lambda checked, t=tool: self.set_tool(t) if checked else None)
+            self.tool_button_group.addButton(radio)
+            tools_layout.addWidget(radio)
+        
+        layout.addWidget(tools_group)
         
     def setup_center_panel(self):
         """Configura il pannello centrale per la visualizzazione PDF"""
-        # Frame per i controlli zoom
-        zoom_frame = tk.Frame(self.center_panel, bg='white', height=30)
-        zoom_frame.pack(fill='x', pady=(0, 5))
-        zoom_frame.pack_propagate(False)
+        layout = QVBoxLayout(self.center_panel)
+        layout.setContentsMargins(0, 0, 0, 0)
         
-        tk.Button(zoom_frame, text="🔍-", command=self.zoom_out).pack(side='left', padx=5)
-        self.zoom_label = tk.Label(zoom_frame, text="100%", bg='white')
-        self.zoom_label.pack(side='left', padx=10)
-        tk.Button(zoom_frame, text="🔍+", command=self.zoom_in).pack(side='left', padx=5)
+        # Controlli zoom
+        zoom_frame = QWidget()
+        zoom_frame.setFixedHeight(40)
+        zoom_frame.setStyleSheet("background-color: white;")
+        zoom_layout = QHBoxLayout(zoom_frame)
         
-        tk.Button(zoom_frame, text="Adatta", command=self.fit_to_window).pack(side='left', padx=20)
+        zoom_out_btn = QPushButton("🔍-")
+        zoom_out_btn.clicked.connect(self.zoom_out)
+        zoom_layout.addWidget(zoom_out_btn)
         
-        # Canvas con scrollbar per il PDF
-        canvas_frame = tk.Frame(self.center_panel, bg='white')
-        canvas_frame.pack(fill='both', expand=True)
+        self.zoom_label = QLabel("100%")
+        zoom_layout.addWidget(self.zoom_label)
         
-        self.canvas = tk.Canvas(canvas_frame, bg='white')
-        v_scrollbar = tk.Scrollbar(canvas_frame, orient='vertical', command=self.canvas.yview)
-        h_scrollbar = tk.Scrollbar(canvas_frame, orient='horizontal', command=self.canvas.xview)
+        zoom_in_btn = QPushButton("🔍+")
+        zoom_in_btn.clicked.connect(self.zoom_in)
+        zoom_layout.addWidget(zoom_in_btn)
         
-        self.canvas.configure(yscrollcommand=v_scrollbar.set, xscrollcommand=h_scrollbar.set)
+        fit_btn = QPushButton("Adatta")
+        fit_btn.clicked.connect(self.fit_to_window)
+        zoom_layout.addWidget(fit_btn)
         
-        self.canvas.pack(side='left', fill='both', expand=True)
-        v_scrollbar.pack(side='right', fill='y')
-        h_scrollbar.pack(side='bottom', fill='x')
+        zoom_layout.addStretch()
         
-        # Bind eventi mouse per interazione
-        self.canvas.bind("<Button-1>", self.on_canvas_click)
-        self.canvas.bind("<B1-Motion>", self.on_canvas_drag)
-        self.canvas.bind("<ButtonRelease-1>", self.on_canvas_release)
-        self.canvas.bind("<Motion>", self.on_canvas_motion)
+        layout.addWidget(zoom_frame)
+        
+        # Area di visualizzazione PDF con scrolling
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setStyleSheet("background-color: white;")
+        
+        self.canvas_label = QLabel()
+        self.canvas_label.setAlignment(Qt.AlignCenter)
+        self.canvas_label.setStyleSheet("background-color: white;")
+        
+        # Abilita mouse tracking per interazioni
+        self.canvas_label.setMouseTracking(True)
+        self.canvas_label.mousePressEvent = self.on_canvas_click
+        self.canvas_label.mouseMoveEvent = self.on_canvas_drag
+        self.canvas_label.mouseReleaseEvent = self.on_canvas_release
+        
+        scroll_area.setWidget(self.canvas_label)
+        layout.addWidget(scroll_area)
         
     def setup_right_panel(self):
         """Configura il pannello destro"""
+        layout = QVBoxLayout(self.right_panel)
+        
         # Titolo
-        title_label = tk.Label(self.right_panel, text="PROPRIETÀ", 
-                              font=('Arial', 10, 'bold'), bg='#e8e8e8')
-        title_label.pack(pady=10)
+        title_label = QLabel("PROPRIETÀ")
+        title_label.setFont(QFont('Arial', 10, QFont.Bold))
+        title_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title_label)
         
         # Proprietà strumento corrente
-        props_frame = tk.LabelFrame(self.right_panel, text="Strumento", bg='#e8e8e8')
-        props_frame.pack(fill='x', padx=10, pady=5)
+        props_group = QGroupBox("Strumento")
+        props_layout = QVBoxLayout(props_group)
         
-        # Font size per testo
-        tk.Label(props_frame, text="Dimensione font:", bg='#e8e8e8').pack(anchor='w')
-        tk.Spinbox(props_frame, from_=8, to=72, textvariable=self.font_size, width=10).pack(anchor='w', pady=2)
+        props_layout.addWidget(QLabel("Dimensione font:"))
+        self.font_size_spinbox = QSpinBox()
+        self.font_size_spinbox.setRange(8, 72)
+        self.font_size_spinbox.setValue(12)
+        self.font_size_spinbox.valueChanged.connect(lambda v: setattr(self, 'font_size', v))
+        props_layout.addWidget(self.font_size_spinbox)
+        
+        layout.addWidget(props_group)
         
         # Commenti e annotazioni
-        comments_frame = tk.LabelFrame(self.right_panel, text="Commenti", bg='#e8e8e8')
-        comments_frame.pack(fill='both', expand=True, padx=10, pady=5)
+        comments_group = QGroupBox("Commenti")
+        comments_layout = QVBoxLayout(comments_group)
         
-        self.comments_listbox = tk.Listbox(comments_frame, height=10)
-        comments_scrollbar = tk.Scrollbar(comments_frame, orient='vertical', 
-                                         command=self.comments_listbox.yview)
-        self.comments_listbox.configure(yscrollcommand=comments_scrollbar.set)
+        self.comments_listbox = QListWidget()
+        comments_layout.addWidget(self.comments_listbox)
         
-        self.comments_listbox.pack(side='left', fill='both', expand=True)
-        comments_scrollbar.pack(side='right', fill='y')
+        layout.addWidget(comments_group, 1)  # Stretch factor 1
         
         # Pulsanti azioni
-        actions_frame = tk.Frame(self.right_panel, bg='#e8e8e8')
-        actions_frame.pack(fill='x', padx=10, pady=5)
+        actions_layout = QVBoxLayout()
         
-        tk.Button(actions_frame, text="Elimina", command=self.delete_selected).pack(fill='x', pady=2)
-        tk.Button(actions_frame, text="Proprietà", command=self.show_properties).pack(fill='x', pady=2)
+        delete_btn = QPushButton("Elimina")
+        delete_btn.clicked.connect(self.delete_selected)
+        actions_layout.addWidget(delete_btn)
+        
+        props_btn = QPushButton("Proprietà")
+        props_btn.clicked.connect(self.show_properties)
+        actions_layout.addWidget(props_btn)
+        
+        layout.addLayout(actions_layout)
         
     def create_status_bar(self):
         """Crea la barra di stato"""
-        self.status_bar = tk.Frame(self.root, bg='#d0d0d0', height=25)
-        self.status_bar.pack(side='bottom', fill='x')
-        self.status_bar.pack_propagate(False)
+        status_bar = self.statusBar()
+        status_bar.setStyleSheet("background-color: #d0d0d0;")
         
-        self.status_label = tk.Label(self.status_bar, text="Pronto", 
-                                    bg='#d0d0d0', anchor='w')
-        self.status_label.pack(side='left', padx=10, fill='x', expand=True)
+        self.status_label = QLabel("Pronto")
+        status_bar.addWidget(self.status_label, 1)
         
-        # Info documento
-        self.doc_info_label = tk.Label(self.status_bar, text="", 
-                                      bg='#d0d0d0', anchor='e')
-        self.doc_info_label.pack(side='right', padx=10)
+        self.doc_info_label = QLabel("")
+        status_bar.addPermanentWidget(self.doc_info_label)
         
     def open_pdf(self):
         """Apre un file PDF"""
-        file_path = filedialog.askopenfilename(
-            title="Apri PDF",
-            filetypes=[("PDF files", "*.pdf")]
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Apri PDF",
+            "",
+            "PDF files (*.pdf)"
         )
         
         if file_path:
             if self.pdf_editor.open_pdf(file_path):
                 self.update_display()
                 self.update_thumbnails()
-                self.status_label.config(text=f"PDF aperto: {os.path.basename(file_path)}")
+                self.status_label.setText(f"PDF aperto: {os.path.basename(file_path)}")
                 
                 # Aggiorna info documento
                 page_count = self.pdf_editor.get_page_count()
-                self.doc_info_label.config(text=f"Pagine: {page_count}")
-                self.page_label.config(text=f"1 / {page_count}")
+                self.doc_info_label.setText(f"Pagine: {page_count}")
+                self.page_label.setText(f"1 / {page_count}")
             else:
-                messagebox.showerror("Errore", "Impossibile aprire il file PDF")
+                QMessageBox.critical(self, "Errore", "Impossibile aprire il file PDF")
     
     def save_pdf(self):
         """Salva il PDF corrente"""
         if not self.pdf_editor.current_doc:
-            messagebox.showwarning("Attenzione", "Nessun PDF aperto")
+            QMessageBox.warning(self, "Attenzione", "Nessun PDF aperto")
             return
             
         # Per ora salva come nuovo file
@@ -316,36 +443,36 @@ class AcrobatLikeGUI:
     def save_pdf_as(self):
         """Salva il PDF con un nuovo nome"""
         if not self.pdf_editor.current_doc:
-            messagebox.showwarning("Attenzione", "Nessun PDF aperto")
+            QMessageBox.warning(self, "Attenzione", "Nessun PDF aperto")
             return
             
-        file_path = filedialog.asksaveasfilename(
-            title="Salva PDF",
-            defaultextension=".pdf",
-            filetypes=[("PDF files", "*.pdf")]
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Salva PDF",
+            "",
+            "PDF files (*.pdf)"
         )
         
         if file_path:
             if self.pdf_editor.save_pdf(file_path):
-                self.status_label.config(text=f"PDF salvato: {os.path.basename(file_path)}")
-                messagebox.showinfo("Successo", "PDF salvato correttamente!")
+                self.status_label.setText(f"PDF salvato: {os.path.basename(file_path)}")
+                QMessageBox.information(self, "Successo", "PDF salvato correttamente!")
             else:
-                messagebox.showerror("Errore", "Errore nel salvataggio del PDF")
+                QMessageBox.critical(self, "Errore", "Errore nel salvataggio del PDF")
     
     def set_tool(self, tool):
         """Imposta lo strumento corrente"""
-        self.current_tool.set(tool)
-        self.status_label.config(text=f"Strumento selezionato: {tool}")
+        self.current_tool = tool
+        self.status_label.setText(f"Strumento selezionato: {tool}")
     
     def choose_color(self):
         """Apre il selettore colore"""
-        color = colorchooser.askcolor(title="Scegli colore")
-        if color[0]:
-            # Converte da RGB 0-255 a RGB 0-1 per PyMuPDF
-            self.current_color = tuple(c/255.0 for c in color[0])
+        color = QColorDialog.getColor(self.current_color, self, "Scegli colore")
+        if color.isValid():
+            self.current_color = color
             # Aggiorna il pulsante colore
-            hex_color = '#{:02x}{:02x}{:02x}'.format(*[int(c) for c in color[0]])
-            self.color_button.config(bg=hex_color)
+            self.color_button.setStyleSheet(f"background-color: {color.name()};")
+
     
     def update_display(self):
         """Aggiorna la visualizzazione della pagina corrente"""
@@ -354,28 +481,30 @@ class AcrobatLikeGUI:
             
         image = self.pdf_editor.get_page_image()
         if image:
-            # Converti PIL Image in PhotoImage per tkinter
-            self.canvas_image = ImageTk.PhotoImage(image)
+            # Converti PIL Image a QPixmap
+            img_byte_arr = io.BytesIO()
+            image.save(img_byte_arr, format='PNG')
+            img_byte_arr = img_byte_arr.getvalue()
             
-            # Pulisci il canvas e mostra l'immagine
-            self.canvas.delete("all")
-            self.canvas.create_image(0, 0, anchor='nw', image=self.canvas_image)
+            qimage = QImage()
+            qimage.loadFromData(img_byte_arr)
+            self.canvas_pixmap = QPixmap.fromImage(qimage)
             
-            # Aggiorna scroll region
-            self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+            # Mostra l'immagine
+            self.canvas_label.setPixmap(self.canvas_pixmap)
             
             # Aggiorna label zoom
             zoom_percent = int(self.pdf_editor.zoom_level * 100)
-            self.zoom_label.config(text=f"{zoom_percent}%")
+            self.zoom_label.setText(f"{zoom_percent}%")
     
     def update_thumbnails(self):
         """Aggiorna la lista delle miniature"""
-        self.thumb_listbox.delete(0, 'end')
+        self.thumb_listbox.clear()
         
         if self.pdf_editor.current_doc:
             page_count = self.pdf_editor.get_page_count()
             for i in range(page_count):
-                self.thumb_listbox.insert('end', f"Pagina {i+1}")
+                self.thumb_listbox.addItem(f"Pagina {i+1}")
     
     def prev_page(self):
         """Vai alla pagina precedente"""
@@ -383,7 +512,7 @@ class AcrobatLikeGUI:
             self.pdf_editor.page_num -= 1
             self.update_display()
             page_count = self.pdf_editor.get_page_count()
-            self.page_label.config(text=f"{self.pdf_editor.page_num + 1} / {page_count}")
+            self.page_label.setText(f"{self.pdf_editor.page_num + 1} / {page_count}")
     
     def next_page(self):
         """Vai alla pagina successiva"""
@@ -392,7 +521,7 @@ class AcrobatLikeGUI:
             self.pdf_editor.page_num += 1
             self.update_display()
             page_count = self.pdf_editor.get_page_count()
-            self.page_label.config(text=f"{self.pdf_editor.page_num + 1} / {page_count}")
+            self.page_label.setText(f"{self.pdf_editor.page_num + 1} / {page_count}")
     
     def zoom_in(self):
         """Aumenta lo zoom"""
@@ -410,8 +539,8 @@ class AcrobatLikeGUI:
             return
             
         # Calcola zoom per adattare alla finestra
-        canvas_width = self.canvas.winfo_width()
-        canvas_height = self.canvas.winfo_height()
+        canvas_width = self.canvas_label.width()
+        canvas_height = self.canvas_label.height()
         
         if canvas_width > 1 and canvas_height > 1:
             # Ottieni dimensioni pagina originale
@@ -429,25 +558,19 @@ class AcrobatLikeGUI:
         if not self.pdf_editor.current_doc:
             return
             
-        # Converti coordinate canvas in coordinate PDF
-        canvas_x = self.canvas.canvasx(event.x)
-        canvas_y = self.canvas.canvasy(event.y)
+        # Converti coordinate a coordinate PDF
+        pdf_x = event.pos().x() / self.pdf_editor.zoom_level
+        pdf_y = event.pos().y() / self.pdf_editor.zoom_level
         
-        # Scala per lo zoom
-        pdf_x = canvas_x / self.pdf_editor.zoom_level
-        pdf_y = canvas_y / self.pdf_editor.zoom_level
-        
-        tool = self.current_tool.get()
-        
-        if tool == "text":
+        if self.current_tool == "text":
             self.add_text_at_position(pdf_x, pdf_y)
-        elif tool == "note":
+        elif self.current_tool == "note":
             self.add_note_at_position(pdf_x, pdf_y)
-        elif tool in ["rectangle", "circle", "line", "arrow"]:
+        elif self.current_tool in ["rectangle", "circle", "line", "arrow"]:
             self.draw_start_x = pdf_x
             self.draw_start_y = pdf_y
             self.drawing = True
-        elif tool == "freehand":
+        elif self.current_tool == "freehand":
             self.current_points = [(pdf_x, pdf_y)]
             self.drawing = True
     
@@ -456,15 +579,10 @@ class AcrobatLikeGUI:
         if not self.drawing:
             return
             
-        canvas_x = self.canvas.canvasx(event.x)
-        canvas_y = self.canvas.canvasy(event.y)
+        pdf_x = event.pos().x() / self.pdf_editor.zoom_level
+        pdf_y = event.pos().y() / self.pdf_editor.zoom_level
         
-        pdf_x = canvas_x / self.pdf_editor.zoom_level
-        pdf_y = canvas_y / self.pdf_editor.zoom_level
-        
-        tool = self.current_tool.get()
-        
-        if tool == "freehand":
+        if self.current_tool == "freehand":
             self.current_points.append((pdf_x, pdf_y))
     
     def on_canvas_release(self, event):
@@ -472,84 +590,80 @@ class AcrobatLikeGUI:
         if not self.drawing:
             return
             
-        canvas_x = self.canvas.canvasx(event.x)
-        canvas_y = self.canvas.canvasy(event.y)
+        pdf_x = event.pos().x() / self.pdf_editor.zoom_level
+        pdf_y = event.pos().y() / self.pdf_editor.zoom_level
         
-        pdf_x = canvas_x / self.pdf_editor.zoom_level
-        pdf_y = canvas_y / self.pdf_editor.zoom_level
-        
-        tool = self.current_tool.get()
         page_num = self.pdf_editor.page_num
         
-        if tool == "rectangle":
+        # Converti QColor a tuple RGB (0-1)
+        r, g, b = self.current_color.redF(), self.current_color.greenF(), self.current_color.blueF()
+        color_tuple = (r, g, b)
+        
+        if self.current_tool == "rectangle":
             rect = fitz.Rect(self.draw_start_x, self.draw_start_y, pdf_x, pdf_y)
-            self.pdf_editor.add_rectangle(page_num, rect, self.current_color, 
-                                        width=self.line_width.get())
-        elif tool == "circle":
+            self.pdf_editor.add_rectangle(page_num, rect, color_tuple, width=self.line_width)
+        elif self.current_tool == "circle":
             rect = fitz.Rect(self.draw_start_x, self.draw_start_y, pdf_x, pdf_y)
-            self.pdf_editor.add_circle(page_num, rect, self.current_color, 
-                                     width=self.line_width.get())
-        elif tool == "line":
+            self.pdf_editor.add_circle(page_num, rect, color_tuple, width=self.line_width)
+        elif self.current_tool == "line":
             start = fitz.Point(self.draw_start_x, self.draw_start_y)
             end = fitz.Point(pdf_x, pdf_y)
-            self.pdf_editor.add_line(page_num, start, end, self.current_color, 
-                                   width=self.line_width.get())
-        elif tool == "arrow":
+            self.pdf_editor.add_line(page_num, start, end, color_tuple, width=self.line_width)
+        elif self.current_tool == "arrow":
             start = fitz.Point(self.draw_start_x, self.draw_start_y)
             end = fitz.Point(pdf_x, pdf_y)
-            self.pdf_editor.add_arrow(page_num, start, end, self.current_color, 
-                                    width=self.line_width.get())
-        elif tool == "freehand" and len(self.current_points) > 1:
+            self.pdf_editor.add_arrow(page_num, start, end, color_tuple, width=self.line_width)
+        elif self.current_tool == "freehand" and len(self.current_points) > 1:
             points = [fitz.Point(x, y) for x, y in self.current_points]
-            self.pdf_editor.add_freehand_drawing(page_num, points, self.current_color, 
-                                               width=self.line_width.get())
+            self.pdf_editor.add_freehand_drawing(page_num, points, color_tuple, width=self.line_width)
         
         self.drawing = False
         self.current_points = []
         self.update_display()
     
-    def on_canvas_motion(self, event):
-        """Gestisce movimento del mouse sul canvas"""
-        pass  # Per ora non utilizzato
-    
     def add_text_at_position(self, x, y):
         """Aggiunge testo alla posizione specificata"""
-        text = simpledialog.askstring("Aggiungi testo", "Inserisci il testo:")
-        if text:
+        text, ok = QInputDialog.getText(self, "Aggiungi testo", "Inserisci il testo:")
+        if ok and text:
+            r, g, b = self.current_color.redF(), self.current_color.greenF(), self.current_color.blueF()
             self.pdf_editor.add_text(self.pdf_editor.page_num, x, y, text, 
-                                   font_size=self.font_size.get(), color=self.current_color)
+                                   font_size=self.font_size, color=(r, g, b))
             self.update_display()
     
     def add_note_at_position(self, x, y):
         """Aggiunge una nota alla posizione specificata"""
-        content = simpledialog.askstring("Aggiungi nota", "Inserisci il contenuto della nota:")
-        if content:
+        content, ok = QInputDialog.getText(self, "Aggiungi nota", "Inserisci il contenuto della nota:")
+        if ok and content:
             self.pdf_editor.add_note(self.pdf_editor.page_num, x, y, content)
             self.update_display()
     
     # Metodi placeholder per le funzionalità del menu
     def undo(self):
-        self.status_label.config(text="Annulla - non ancora implementato")
+        self.status_label.setText("Annulla - non ancora implementato")
     
     def redo(self):
-        self.status_label.config(text="Ripeti - non ancora implementato")
+        self.status_label.setText("Ripeti - non ancora implementato")
     
     def copy(self):
-        self.status_label.config(text="Copia - non ancora implementato")
+        self.status_label.setText("Copia - non ancora implementato")
     
     def paste(self):
-        self.status_label.config(text="Incolla - non ancora implementato")
+        self.status_label.setText("Incolla - non ancora implementato")
     
     def delete_selected(self):
-        self.status_label.config(text="Elimina - non ancora implementato")
+        self.status_label.setText("Elimina - non ancora implementato")
     
     def show_properties(self):
-        self.status_label.config(text="Proprietà - non ancora implementato")
+        self.status_label.setText("Proprietà - non ancora implementato")
 
 def main():
-    root = tk.Tk()
-    app = AcrobatLikeGUI(root)
-    root.mainloop()
+    from PySide6.QtWidgets import QApplication
+    import sys
+    
+    app = QApplication(sys.argv)
+    window = AcrobatLikeGUI()
+    window.show()
+    sys.exit(app.exec())
 
 if __name__ == "__main__":
     main()
