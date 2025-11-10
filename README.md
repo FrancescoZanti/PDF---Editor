@@ -2,7 +2,9 @@
 
 Una potente applicazione desktop per modificare file PDF sviluppata in Python con interfaccia grafica moderna basata su **PySide6 (Qt)**, completamente compatibile con Windows 11.
 
-![PDF Editor UI](assets/pyside6_modern_ui.png)
+| Interfaccia Moderna | Con Contenuto |
+|:-------------------:|:-------------:|
+| ![PDF Editor UI](assets/pyside6_modern_ui.png) | ![PDF Editor con contenuto](assets/pyside6_with_content.png) |
 
 ## 🚀 Funzionalità Principali
 
