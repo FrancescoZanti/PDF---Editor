@@ -1,10 +1,50 @@
 # PDF Editor - Applicazione Desktop Python
 
+[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](CHANGELOG.md)
+[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-lightgrey.svg)](https://www.microsoft.com/windows)
+[![UI Framework](https://img.shields.io/badge/UI-PySide6%20(Qt)-brightgreen.svg)](https://www.qt.io/qt-for-python)
+[![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
 Una potente applicazione desktop per modificare file PDF sviluppata in Python con interfaccia grafica moderna basata su **PySide6 (Qt)**, completamente compatibile con Windows 11.
+
+> **✨ Caratteristiche principali**: Interfaccia moderna Windows 11 • Operazioni PDF complete • Supporto alta risoluzione • Open Source MIT
 
 | Interfaccia Moderna | Con Contenuto |
 |:-------------------:|:-------------:|
 | ![PDF Editor UI](assets/pyside6_modern_ui.png) | ![PDF Editor con contenuto](assets/pyside6_with_content.png) |
+
+## 📑 Indice
+
+- [Quick Start](#-quick-start)
+- [Funzionalità Principali](#-funzionalità-principali)
+- [Requisiti di Sistema](#-requisiti-di-sistema)
+- [Installazione](#-installazione)
+- [Utilizzo](#-utilizzo)
+- [Struttura del Progetto](#️-struttura-del-progetto)
+- [Tecnologie Utilizzate](#-tecnologie-utilizzate)
+- [Prestazioni e Suggerimenti](#-prestazioni-e-suggerimenti)
+- [Risoluzione dei Problemi](#-risoluzione-dei-problemi)
+- [Roadmap](#-roadmap-e-aggiornamenti-futuri)
+- [FAQ](#-domande-frequenti-faq)
+- [Sicurezza e Privacy](#-sicurezza-e-privacy)
+- [Contribuzioni](#-contribuzioni)
+- [Supporto](#-supporto)
+- [Licenza](#-licenza)
+
+---
+
+## 📚 Documentazione Aggiuntiva
+
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Guida completa per contribuire al progetto
+- **[CHANGELOG.md](CHANGELOG.md)** - Cronologia delle modifiche e versioni
+- **[README_PRO.md](README_PRO.md)** - Documentazione approfondita versione Pro
+- **[GUIDA_RAPIDA.md](GUIDA_RAPIDA.md)** - Guida rapida funzionalità Pro
+- **[ISTRUZIONI_AVVIO.md](ISTRUZIONI_AVVIO.md)** - Istruzioni dettagliate per avviare l'applicazione
+- **[MIGRATION_NOTES.md](MIGRATION_NOTES.md)** - Note tecniche sulla migrazione a PySide6
+
+---
 
 ## 🚀 Quick Start
 
@@ -36,33 +76,157 @@ python pdf_editor.py
 
 ## 🔧 Requisiti di Sistema
 
-- **Sistema Operativo**: Windows 10/11
-- **Python**: 3.8 o superiore
-- **Memoria RAM**: Minimo 2GB
-- **Spazio su Disco**: 100MB per l'applicazione + spazio per i file PDF
+### Requisiti Minimi
+
+| Componente | Requisito Minimo | Raccomandato |
+|------------|------------------|--------------|
+| **Sistema Operativo** | Windows 10 (64-bit) | Windows 11 (64-bit) |
+| **Python** | 3.8.0 | 3.11.0 o superiore |
+| **RAM** | 2 GB | 8 GB |
+| **Spazio Disco** | 200 MB | 500 MB |
+| **Risoluzione Schermo** | 1366 x 768 | 1920 x 1080 (Full HD) |
+| **Processore** | Intel/AMD Dual-core | Intel/AMD Quad-core |
+
+### Software Aggiuntivo
+
+#### Obbligatori
+- **Python 3.8+** - [Scarica da python.org](https://www.python.org/downloads/)
+  - ⚠️ Durante l'installazione, seleziona "Add Python to PATH"
+
+#### Opzionali (per funzionalità specifiche)
+- **Lettore PDF** (per funzione Anteprima)
+  - Adobe Acrobat Reader DC (consigliato)
+  - Microsoft Edge (integrato in Windows)
+  - Foxit Reader o altri
+  
+- **Poppler** (per conversione PDF in immagini)
+  - Automaticamente gestito da pdf2image
+  - Windows: Scarica binary da [poppler releases](https://github.com/oschwartz10612/poppler-windows/releases/)
+
+### Note sulla Compatibilità
+
+- ✅ **Windows 10**: Completamente supportato
+- ✅ **Windows 11**: Completamente supportato con UI ottimizzata
+- ⚠️ **Windows 8.1 e precedenti**: Non testato, potrebbe funzionare
+- ❌ **Windows 7**: Non supportato ufficialmente (manca supporto PySide6)
+- 💡 **macOS/Linux**: PySide6 è cross-platform, ma l'app è ottimizzata per Windows
 
 ## 📦 Installazione
 
-### Metodo 1: Installazione Automatica
+### Metodo 1: Installazione Automatica (Raccomandato)
 
-1. Clona o scarica questo repository
-2. Apri il terminale nella cartella del progetto
-3. Esegui il comando di installazione:
+#### Passo 1: Scarica il Progetto
+
+**Opzione A - Con Git:**
+```bash
+# Clona il repository
+git clone https://github.com/FrancescoZanti/PDF---Editor.git
+
+# Entra nella cartella
+cd PDF---Editor
+```
+
+**Opzione B - Download ZIP:**
+1. Vai su [GitHub](https://github.com/FrancescoZanti/PDF---Editor)
+2. Clicca su "Code" → "Download ZIP"
+3. Estrai il file ZIP
+4. Apri il terminale nella cartella estratta
+
+#### Passo 2: Installa le Dipendenze
 
 ```bash
+# Installa tutte le dipendenze automaticamente
 pip install -r requirements.txt
+```
+
+**Tempo stimato**: 2-5 minuti (dipende dalla velocità della connessione)
+
+#### Passo 3: Verifica l'Installazione
+
+```bash
+# Esegui il test diagnostico
+python test_simple.py
+```
+
+**Output atteso:**
+```
+✓ Import main: OK
+✓ Funzione main: OK
+✓ Classe PDFEditor: OK
+✓ Tutti i test superati!
 ```
 
 ### Metodo 2: Installazione Manuale
 
-Installa le dipendenze una per una:
+Se preferisci installare le dipendenze una per una:
+
+**Dipendenze Base:**
+```bash
+pip install PySide6        # Framework UI moderno
+pip install pypdf          # Manipolazione PDF
+pip install pillow         # Gestione immagini
+pip install pdf2image      # Conversione PDF->immagini
+pip install reportlab      # Creazione PDF e watermark
+```
+
+**Dipendenze Pro (opzionali):**
+```bash
+pip install PyMuPDF        # Editing PDF avanzato
+pip install cryptography   # Crittografia
+pip install numpy          # Elaborazione numerica
+pip install opencv-python  # Computer vision
+pip install matplotlib     # Grafici
+```
+
+### Metodo 3: Ambiente Virtuale (Best Practice per Sviluppatori)
 
 ```bash
-pip install PySide6
-pip install pypdf
-pip install pillow
-pip install pdf2image
-pip install reportlab
+# Crea un ambiente virtuale
+python -m venv venv
+
+# Attiva l'ambiente virtuale
+# Su Windows:
+venv\Scripts\activate
+# Su Linux/Mac:
+source venv/bin/activate
+
+# Installa le dipendenze nell'ambiente virtuale
+pip install -r requirements.txt
+
+# Quando hai finito, disattiva l'ambiente
+deactivate
+```
+
+### Risoluzione Problemi di Installazione
+
+#### ❌ Errore "pip: command not found"
+```bash
+# Prova con:
+python -m pip install -r requirements.txt
+# oppure
+py -m pip install -r requirements.txt
+```
+
+#### ❌ Errore di permessi su Windows
+```bash
+# Esegui il terminale come Amministratore
+# oppure usa --user:
+pip install --user -r requirements.txt
+```
+
+#### ❌ Timeout durante il download
+```bash
+# Aumenta il timeout:
+pip install --timeout=300 -r requirements.txt
+```
+
+#### ❌ Conflitti di versione
+```bash
+# Aggiorna pip prima:
+python -m pip install --upgrade pip
+
+# Poi reinstalla:
+pip install -r requirements.txt
 ```
 
 ## 🎯 Utilizzo
@@ -350,13 +514,96 @@ L'applicazione mostra tutti i messaggi di errore nell'area di output in fondo al
 ### Suggerimenti e Richieste
 Hai un'idea per una nuova funzionalità? [Apri una feature request](https://github.com/FrancescoZanti/PDF---Editor/issues/new) su GitHub!
 
+## 🔒 Sicurezza e Privacy
+
+### Elaborazione Locale
+
+- ✅ **Tutti i file vengono elaborati localmente** sul tuo computer
+- ✅ **Nessun caricamento su server esterni** - la tua privacy è garantita
+- ✅ **Nessun tracciamento o analytics** - non raccogliamo dati degli utenti
+- ✅ **Open source** - Puoi ispezionare il codice sorgente liberamente
+
+### Gestione dei File
+
+- I file PDF vengono letti e scritti solo sulle cartelle che specifichi
+- L'applicazione non modifica mai i file originali (salvo esplicita scelta dell'utente)
+- I file di output vengono creati in nuove posizioni per preservare gli originali
+
+### Dipendenze di Terze Parti
+
+Tutte le librerie utilizzate sono open source e verificate:
+- Installate tramite PyPI (Python Package Index)
+- Regolarmente aggiornate per sicurezza
+- Nessuna libreria sospetta o non verificata
+
+### Versione Pro - Funzionalità di Sicurezza
+
+La versione Pro include funzionalità avanzate di sicurezza:
+- **Crittografia PDF** con algoritmi standard del settore
+- **Password protection** per documenti sensibili
+- **Controllo permessi** per limitare azioni sul PDF
+- **Rimozione metadati** per privacy avanzata
+
+**Nota**: Le password e chiavi di crittografia non vengono mai salvate dall'applicazione.
+
 ## 📝 Licenza
 
-Questo progetto è rilasciato sotto licenza MIT. Vedi il file LICENSE per i dettagli completi.
+Questo progetto è rilasciato sotto **licenza MIT**. 
+
+### Cosa significa?
+
+- ✅ **Uso commerciale** - Puoi usarlo nei tuoi progetti commerciali
+- ✅ **Modifica** - Puoi modificare il codice come preferisci
+- ✅ **Distribuzione** - Puoi distribuire copie modificate o originali
+- ✅ **Uso privato** - Puoi usarlo per qualsiasi scopo personale
+- ⚠️ **Limitazione di responsabilità** - Il software è fornito "così com'è"
+- ⚠️ **Nessuna garanzia** - Gli autori non sono responsabili per eventuali danni
+
+Vedi il file [LICENSE](LICENSE) per i dettagli completi del testo legale.
 
 ## 👨‍💻 Sviluppatore
 
+**Francesco Zanti** - Ideatore e sviluppatore principale
+
 Sviluppato con ❤️ per Windows
+
+## 🙏 Ringraziamenti
+
+Questo progetto non sarebbe stato possibile senza:
+
+### Librerie e Framework
+- **[PySide6](https://www.qt.io/qt-for-python)** - Framework UI moderno basato su Qt
+- **[pypdf](https://github.com/py-pdf/pypdf)** - Manipolazione PDF in Python
+- **[PyMuPDF](https://pymupdf.readthedocs.io/)** - Engine PDF avanzato per editing
+- **[Pillow](https://python-pillow.org/)** - Libreria di elaborazione immagini
+- **[ReportLab](https://www.reportlab.com/)** - Generazione PDF professionale
+
+### Community
+- Tutti i **contributori** che hanno migliorato il progetto
+- La **community Python** per le eccellenti librerie
+- Gli utenti che hanno segnalato bug e suggerito funzionalità
+- I **maintainer open source** che ispirano questo progetto
+
+### Ispirazione
+- **Adobe Acrobat DC** - Per il design dell'interfaccia Pro
+- **PDF-XChange Editor** - Per le funzionalità di annotazione
+- **PDFtk** - Per gli approcci alle operazioni PDF
+
+## 🌟 Stella il Progetto
+
+Se questo progetto ti è stato utile, considera di dargli una stella ⭐ su GitHub!
+
+Aiuta altri a scoprire PDF Editor e supporta lo sviluppo continuo.
+
+[![GitHub stars](https://img.shields.io/github/stars/FrancescoZanti/PDF---Editor.svg?style=social&label=Star)](https://github.com/FrancescoZanti/PDF---Editor)
+
+---
+
+<p align="center">
+  <strong>Realizzato con ❤️ e Python</strong>
+  <br>
+  <em>Open Source • Free Forever • Community Driven</em>
+</p>
 
 ## 🤝 Contribuzioni
 
