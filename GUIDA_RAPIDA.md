@@ -1,6 +1,6 @@
 # 🚀 GUIDA RAPIDA - PDF EDITOR PRO v2.0
 
-> **⚠️ NOTA**: La versione PRO utilizza ancora l'interfaccia tkinter. Per utilizzare la nuova interfaccia moderna PySide6, usa l'**Editor Base** con `python pdf_editor.py`
+> **✨ NOVITÀ**: La versione PRO è stata completamente migrata a **PySide6 (Qt)** con interfaccia moderna Windows 11! Tutte le funzionalità avanzate ora beneficiano della nuova UI professionale.
 
 ## 📋 Come Iniziare
 
