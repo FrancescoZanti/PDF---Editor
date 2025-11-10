@@ -1,6 +1,11 @@
 import fitz
-import tkinter as tk
-from tkinter import ttk, messagebox, simpledialog
+from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
+                               QPushButton, QMessageBox, QFileDialog, QRadioButton,
+                               QGroupBox, QDialog, QTabWidget, QTreeWidget, 
+                               QTreeWidgetItem, QTextEdit, QButtonGroup, QInputDialog,
+                               QGridLayout)
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QFont
 
 class PDFFormEditor:
     def __init__(self, pdf_editor):
@@ -375,8 +380,9 @@ class PDFFormEditor:
             print(f"Errore nella validazione del form: {e}")
             return False, [f"Errore nella validazione: {e}"]
 
-class FormEditorGUI:
+class FormEditorGUI(QWidget):
     def __init__(self, parent, pdf_editor):
+        super().__init__(parent)
         self.parent = parent
         self.pdf_editor = pdf_editor
         self.form_editor = PDFFormEditor(pdf_editor)
@@ -386,52 +392,58 @@ class FormEditorGUI:
     def open_form_editor(self):
         """Apre la finestra dell'editor form"""
         if self.form_window:
-            self.form_window.lift()
+            self.form_window.activateWindow()
             return
             
-        self.form_window = tk.Toplevel(self.parent)
-        self.form_window.title("Editor Form PDF")
-        self.form_window.geometry("600x500")
-        self.form_window.configure(bg='#f0f0f0')
+        self.form_window = QDialog(self.parent)
+        self.form_window.setWindowTitle("Editor Form PDF")
+        self.form_window.resize(600, 500)
+        self.form_window.setStyleSheet("background-color: #f0f0f0;")
         
         self.setup_form_editor_ui()
         
-        # Gestisci chiusura finestra
-        self.form_window.protocol("WM_DELETE_WINDOW", self.close_form_editor)
+        # Mostra la finestra
+        self.form_window.show()
     
     def setup_form_editor_ui(self):
         """Configura l'interfaccia dell'editor form"""
-        # Titolo
-        title_label = tk.Label(self.form_window, text="EDITOR FORM PDF", 
-                              font=('Arial', 14, 'bold'), bg='#f0f0f0')
-        title_label.pack(pady=10)
+        layout = QVBoxLayout(self.form_window)
         
-        # Notebook per organizzare le funzioni
-        notebook = ttk.Notebook(self.form_window)
-        notebook.pack(fill='both', expand=True, padx=10, pady=5)
+        # Titolo
+        title_label = QLabel("EDITOR FORM PDF")
+        title_label.setFont(QFont('Arial', 14, QFont.Bold))
+        title_label.setAlignment(Qt.AlignCenter)
+        title_label.setStyleSheet("background-color: #f0f0f0;")
+        layout.addWidget(title_label)
+        
+        # Tab widget per organizzare le funzioni
+        tab_widget = QTabWidget()
+        layout.addWidget(tab_widget)
         
         # Tab 1: Crea campi
-        create_frame = ttk.Frame(notebook)
-        notebook.add(create_frame, text="Crea Campi")
-        self.setup_create_fields_tab(create_frame)
+        create_widget = QWidget()
+        tab_widget.addTab(create_widget, "Crea Campi")
+        self.setup_create_fields_tab(create_widget)
         
         # Tab 2: Gestisci campi esistenti
-        manage_frame = ttk.Frame(notebook)
-        notebook.add(manage_frame, text="Gestisci Campi")
-        self.setup_manage_fields_tab(manage_frame)
+        manage_widget = QWidget()
+        tab_widget.addTab(manage_widget, "Gestisci Campi")
+        self.setup_manage_fields_tab(manage_widget)
         
         # Tab 3: Dati form
-        data_frame = ttk.Frame(notebook)
-        notebook.add(data_frame, text="Dati Form")
-        self.setup_form_data_tab(data_frame)
+        data_widget = QWidget()
+        tab_widget.addTab(data_widget, "Dati Form")
+        self.setup_form_data_tab(data_widget)
     
     def setup_create_fields_tab(self, parent):
         """Configura il tab per creare campi"""
-        # Frame per tipo di campo
-        type_frame = tk.LabelFrame(parent, text="Tipo di Campo")
-        type_frame.pack(fill='x', padx=10, pady=5)
+        layout = QVBoxLayout(parent)
         
-        self.field_type = tk.StringVar(value="text")
+        # Frame per tipo di campo
+        type_group = QGroupBox("Tipo di Campo")
+        type_layout = QGridLayout(type_group)
+        
+        self.field_type_group = QButtonGroup()
         
         field_types = [
             ("Campo Testo", "text"),
@@ -447,112 +459,215 @@ class FormEditorGUI:
         for i, (text, value) in enumerate(field_types):
             row = i // 4
             col = i % 4
-            tk.Radiobutton(type_frame, text=text, variable=self.field_type, value=value).grid(
-                row=row, column=col, sticky='w', padx=5, pady=2)
+            radio = QRadioButton(text)
+            radio.setProperty("value", value)
+            if value == "text":
+                radio.setChecked(True)
+            self.field_type_group.addButton(radio)
+            type_layout.addWidget(radio, row, col)
+        
+        layout.addWidget(type_group)
         
         # Frame per proprietà
-        props_frame = tk.LabelFrame(parent, text="Proprietà Campo")
-        props_frame.pack(fill='x', padx=10, pady=5)
+        props_group = QGroupBox("Proprietà Campo")
+        props_layout = QGridLayout(props_group)
         
-        tk.Label(props_frame, text="Nome Campo:").grid(row=0, column=0, sticky='w', padx=5, pady=2)
-        self.field_name_entry = tk.Entry(props_frame, width=30)
-        self.field_name_entry.grid(row=0, column=1, padx=5, pady=2)
+        props_layout.addWidget(QLabel("Nome Campo:"), 0, 0)
+        self.field_name_entry = QLineEdit()
+        props_layout.addWidget(self.field_name_entry, 0, 1)
         
-        tk.Label(props_frame, text="Valore Default:").grid(row=1, column=0, sticky='w', padx=5, pady=2)
-        self.default_value_entry = tk.Entry(props_frame, width=30)
-        self.default_value_entry.grid(row=1, column=1, padx=5, pady=2)
+        props_layout.addWidget(QLabel("Valore Default:"), 1, 0)
+        self.default_value_entry = QLineEdit()
+        props_layout.addWidget(self.default_value_entry, 1, 1)
         
-        tk.Label(props_frame, text="Opzioni (separate da virgola):").grid(row=2, column=0, sticky='w', padx=5, pady=2)
-        self.options_entry = tk.Entry(props_frame, width=30)
-        self.options_entry.grid(row=2, column=1, padx=5, pady=2)
+        props_layout.addWidget(QLabel("Opzioni (separate da virgola):"), 2, 0)
+        self.options_entry = QLineEdit()
+        props_layout.addWidget(self.options_entry, 2, 1)
+        
+        layout.addWidget(props_group)
         
         # Pulsanti azione
-        action_frame = tk.Frame(parent)
-        action_frame.pack(fill='x', padx=10, pady=10)
+        buttons_layout = QHBoxLayout()
         
-        tk.Button(action_frame, text="Crea Campo", command=self.create_field_interactive,
-                 bg='#4CAF50', fg='white', font=('Arial', 10, 'bold')).pack(side='left', padx=5)
+        create_btn = QPushButton("Crea Campo")
+        create_btn.clicked.connect(self.create_field_interactive)
+        create_btn.setFont(QFont('Arial', 10, QFont.Bold))
+        create_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 10px;
+            }
+            QPushButton:hover { background-color: #45a049; }
+        """)
+        buttons_layout.addWidget(create_btn)
         
-        tk.Button(action_frame, text="Anteprima", command=self.preview_field,
-                 bg='#2196F3', fg='white', font=('Arial', 10, 'bold')).pack(side='left', padx=5)
+        preview_btn = QPushButton("Anteprima")
+        preview_btn.clicked.connect(self.preview_field)
+        preview_btn.setFont(QFont('Arial', 10, QFont.Bold))
+        preview_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #2196F3;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 10px;
+            }
+            QPushButton:hover { background-color: #1976D2; }
+        """)
+        buttons_layout.addWidget(preview_btn)
+        
+        layout.addLayout(buttons_layout)
+        layout.addStretch()
     
     def setup_manage_fields_tab(self, parent):
         """Configura il tab per gestire campi esistenti"""
+        layout = QVBoxLayout(parent)
+        
         # Lista campi esistenti
-        list_frame = tk.LabelFrame(parent, text="Campi Esistenti")
-        list_frame.pack(fill='both', expand=True, padx=10, pady=5)
+        list_group = QGroupBox("Campi Esistenti")
+        list_layout = QVBoxLayout(list_group)
         
-        # Treeview per mostrare i campi
-        columns = ('Nome', 'Tipo', 'Valore', 'Pagina')
-        self.fields_tree = ttk.Treeview(list_frame, columns=columns, show='headings', height=10)
+        # Tree widget per mostrare i campi
+        self.fields_tree = QTreeWidget()
+        self.fields_tree.setHeaderLabels(['Nome', 'Tipo', 'Valore', 'Pagina'])
+        self.fields_tree.setMinimumHeight(250)
+        list_layout.addWidget(self.fields_tree)
         
-        for col in columns:
-            self.fields_tree.heading(col, text=col)
-            self.fields_tree.column(col, width=120)
-        
-        # Scrollbar per treeview
-        tree_scrollbar = ttk.Scrollbar(list_frame, orient='vertical', command=self.fields_tree.yview)
-        self.fields_tree.configure(yscrollcommand=tree_scrollbar.set)
-        
-        self.fields_tree.pack(side='left', fill='both', expand=True)
-        tree_scrollbar.pack(side='right', fill='y')
+        layout.addWidget(list_group)
         
         # Pulsanti gestione
-        manage_buttons_frame = tk.Frame(parent)
-        manage_buttons_frame.pack(fill='x', padx=10, pady=5)
+        buttons_layout = QHBoxLayout()
         
-        tk.Button(manage_buttons_frame, text="Aggiorna Lista", command=self.refresh_fields_list,
-                 bg='#FF9800', fg='white').pack(side='left', padx=5)
+        refresh_btn = QPushButton("Aggiorna Lista")
+        refresh_btn.clicked.connect(self.refresh_fields_list)
+        refresh_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #FF9800;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 8px;
+            }
+            QPushButton:hover { background-color: #F57C00; }
+        """)
+        buttons_layout.addWidget(refresh_btn)
         
-        tk.Button(manage_buttons_frame, text="Modifica Valore", command=self.edit_field_value,
-                 bg='#9C27B0', fg='white').pack(side='left', padx=5)
+        edit_btn = QPushButton("Modifica Valore")
+        edit_btn.clicked.connect(self.edit_field_value)
+        edit_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #9C27B0;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 8px;
+            }
+            QPushButton:hover { background-color: #7B1FA2; }
+        """)
+        buttons_layout.addWidget(edit_btn)
         
-        tk.Button(manage_buttons_frame, text="Elimina Campo", command=self.delete_field,
-                 bg='#F44336', fg='white').pack(side='left', padx=5)
+        delete_btn = QPushButton("Elimina Campo")
+        delete_btn.clicked.connect(self.delete_field)
+        delete_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #F44336;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 8px;
+            }
+            QPushButton:hover { background-color: #D32F2F; }
+        """)
+        buttons_layout.addWidget(delete_btn)
+        
+        layout.addLayout(buttons_layout)
     
     def setup_form_data_tab(self, parent):
         """Configura il tab per i dati del form"""
+        layout = QVBoxLayout(parent)
+        
         # Importa/Esporta dati
-        io_frame = tk.LabelFrame(parent, text="Importa/Esporta Dati")
-        io_frame.pack(fill='x', padx=10, pady=5)
+        io_group = QGroupBox("Importa/Esporta Dati")
+        io_layout = QHBoxLayout(io_group)
         
-        tk.Button(io_frame, text="Esporta Dati Form", command=self.export_form_data,
-                 bg='#4CAF50', fg='white', width=20).pack(side='left', padx=10, pady=10)
+        export_btn = QPushButton("Esporta Dati Form")
+        export_btn.clicked.connect(self.export_form_data)
+        export_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 10px;
+                min-width: 150px;
+            }
+            QPushButton:hover { background-color: #45a049; }
+        """)
+        io_layout.addWidget(export_btn)
         
-        tk.Button(io_frame, text="Importa Dati Form", command=self.import_form_data,
-                 bg='#2196F3', fg='white', width=20).pack(side='left', padx=10, pady=10)
+        import_btn = QPushButton("Importa Dati Form")
+        import_btn.clicked.connect(self.import_form_data)
+        import_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #2196F3;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 10px;
+                min-width: 150px;
+            }
+            QPushButton:hover { background-color: #1976D2; }
+        """)
+        io_layout.addWidget(import_btn)
+        
+        layout.addWidget(io_group)
         
         # Validazione
-        validation_frame = tk.LabelFrame(parent, text="Validazione Form")
-        validation_frame.pack(fill='x', padx=10, pady=5)
+        validation_group = QGroupBox("Validazione Form")
+        validation_layout = QVBoxLayout(validation_group)
         
-        tk.Button(validation_frame, text="Valida Form", command=self.validate_form,
-                 bg='#FF9800', fg='white', width=20).pack(pady=10)
+        validate_btn = QPushButton("Valida Form")
+        validate_btn.clicked.connect(self.validate_form)
+        validate_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #FF9800;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 10px;
+                min-width: 150px;
+            }
+            QPushButton:hover { background-color: #F57C00; }
+        """)
+        validation_layout.addWidget(validate_btn)
         
         # Area risultati validazione
-        self.validation_text = tk.Text(validation_frame, height=8, width=60)
-        validation_scrollbar = tk.Scrollbar(validation_frame, orient='vertical', 
-                                          command=self.validation_text.yview)
-        self.validation_text.configure(yscrollcommand=validation_scrollbar.set)
+        self.validation_text = QTextEdit()
+        self.validation_text.setReadOnly(True)
+        self.validation_text.setMinimumHeight(150)
+        validation_layout.addWidget(self.validation_text)
         
-        self.validation_text.pack(side='left', fill='both', expand=True, padx=5, pady=5)
-        validation_scrollbar.pack(side='right', fill='y', pady=5)
+        layout.addWidget(validation_group)
+        layout.addStretch()
     
     def create_field_interactive(self):
         """Crea un campo in modo interattivo"""
         if not self.pdf_editor.current_doc:
-            messagebox.showwarning("Attenzione", "Nessun PDF aperto")
+            QMessageBox.warning(self.form_window, "Attenzione", "Nessun PDF aperto")
             return
         
-        field_name = self.field_name_entry.get().strip()
+        field_name = self.field_name_entry.text().strip()
         if not field_name:
-            messagebox.showwarning("Attenzione", "Inserisci un nome per il campo")
+            QMessageBox.warning(self.form_window, "Attenzione", "Inserisci un nome per il campo")
             return
         
-        # Chiudi la finestra form temporaneamente per permettere la selezione
-        self.form_window.withdraw()
+        # Nascondi temporaneamente la finestra
+        self.form_window.hide()
         
-        messagebox.showinfo("Selezione Area", 
+        QMessageBox.information(self.form_window, "Selezione Area", 
                            "Clicca e trascina sulla pagina PDF per definire l'area del campo")
         
         # TODO: Implementare selezione interattiva dell'area
@@ -560,9 +675,15 @@ class FormEditorGUI:
         page_num = self.pdf_editor.page_num
         rect = fitz.Rect(100, 100, 300, 130)  # Area di default
         
-        field_type = self.field_type.get()
-        default_value = self.default_value_entry.get()
-        options = [opt.strip() for opt in self.options_entry.get().split(',') if opt.strip()]
+        # Get selected field type
+        field_type = "text"
+        for button in self.field_type_group.buttons():
+            if button.isChecked():
+                field_type = button.property("value")
+                break
+        
+        default_value = self.default_value_entry.text()
+        options = [opt.strip() for opt in self.options_entry.text().split(',') if opt.strip()]
         
         success = False
         
@@ -582,126 +703,144 @@ class FormEditorGUI:
         elif field_type == "signature":
             success = self.form_editor.create_signature_field(page_num, rect, field_name)
         
-        # Ripristina la finestra form
-        self.form_window.deiconify()
+        # Ripristina la finestra
+        self.form_window.show()
         
         if success:
-            messagebox.showinfo("Successo", f"Campo '{field_name}' creato correttamente")
+            QMessageBox.information(self.form_window, "Successo", f"Campo '{field_name}' creato correttamente")
             self.refresh_fields_list()
         else:
-            messagebox.showerror("Errore", f"Errore nella creazione del campo '{field_name}'")
+            QMessageBox.critical(self.form_window, "Errore", f"Errore nella creazione del campo '{field_name}'")
     
     def refresh_fields_list(self):
         """Aggiorna la lista dei campi"""
         # Pulisci la lista esistente
-        for item in self.fields_tree.get_children():
-            self.fields_tree.delete(item)
+        self.fields_tree.clear()
         
         # Ottieni e mostra i campi attuali
         fields = self.form_editor.get_form_fields()
         for field in fields:
-            self.fields_tree.insert('', 'end', values=(
+            item = QTreeWidgetItem([
                 field['name'], 
                 field['type'], 
                 str(field['value'])[:30] + ('...' if len(str(field['value'])) > 30 else ''),
-                field['page'] + 1
-            ))
+                str(field['page'] + 1)
+            ])
+            self.fields_tree.addTopLevelItem(item)
     
     def edit_field_value(self):
         """Modifica il valore di un campo selezionato"""
-        selection = self.fields_tree.selection()
-        if not selection:
-            messagebox.showwarning("Attenzione", "Seleziona un campo da modificare")
+        selected_items = self.fields_tree.selectedItems()
+        if not selected_items:
+            QMessageBox.warning(self.form_window, "Attenzione", "Seleziona un campo da modificare")
             return
         
-        item = self.fields_tree.item(selection[0])
-        field_name = item['values'][0]
-        current_value = item['values'][2]
+        item = selected_items[0]
+        field_name = item.text(0)
+        current_value = item.text(2)
         
-        new_value = simpledialog.askstring("Modifica Valore", 
-                                          f"Nuovo valore per '{field_name}':", 
-                                          initialvalue=current_value)
+        new_value, ok = QInputDialog.getText(
+            self.form_window, 
+            "Modifica Valore", 
+            f"Nuovo valore per '{field_name}':",
+            QLineEdit.Normal,
+            current_value
+        )
         
-        if new_value is not None:
+        if ok and new_value is not None:
             if self.form_editor.set_field_value(field_name, new_value):
-                messagebox.showinfo("Successo", "Valore aggiornato correttamente")
+                QMessageBox.information(self.form_window, "Successo", "Valore aggiornato correttamente")
                 self.refresh_fields_list()
             else:
-                messagebox.showerror("Errore", "Errore nell'aggiornamento del valore")
+                QMessageBox.critical(self.form_window, "Errore", "Errore nell'aggiornamento del valore")
     
     def delete_field(self):
         """Elimina un campo selezionato"""
-        selection = self.fields_tree.selection()
-        if not selection:
-            messagebox.showwarning("Attenzione", "Seleziona un campo da eliminare")
+        selected_items = self.fields_tree.selectedItems()
+        if not selected_items:
+            QMessageBox.warning(self.form_window, "Attenzione", "Seleziona un campo da eliminare")
             return
         
-        item = self.fields_tree.item(selection[0])
-        field_name = item['values'][0]
+        item = selected_items[0]
+        field_name = item.text(0)
         
-        if messagebox.askyesno("Conferma", f"Eliminare il campo '{field_name}'?"):
+        reply = QMessageBox.question(
+            self.form_window,
+            "Conferma",
+            f"Eliminare il campo '{field_name}'?",
+            QMessageBox.Yes | QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
             if self.form_editor.delete_field(field_name):
-                messagebox.showinfo("Successo", "Campo eliminato correttamente")
+                QMessageBox.information(self.form_window, "Successo", "Campo eliminato correttamente")
                 self.refresh_fields_list()
             else:
-                messagebox.showerror("Errore", "Errore nell'eliminazione del campo")
+                QMessageBox.critical(self.form_window, "Errore", "Errore nell'eliminazione del campo")
     
     def export_form_data(self):
         """Esporta i dati del form"""
-        from tkinter import filedialog
-        
-        file_path = filedialog.asksaveasfilename(
-            title="Esporta Dati Form",
-            defaultextension=".json",
-            filetypes=[("JSON files", "*.json")]
+        file_path, _ = QFileDialog.getSaveFileName(
+            self.form_window,
+            "Esporta Dati Form",
+            "",
+            "JSON files (*.json)"
         )
         
         if file_path:
             if self.form_editor.export_form_data(file_path):
-                messagebox.showinfo("Successo", "Dati form esportati correttamente")
+                QMessageBox.information(self.form_window, "Successo", "Dati form esportati correttamente")
             else:
-                messagebox.showerror("Errore", "Errore nell'esportazione dei dati")
+                QMessageBox.critical(self.form_window, "Errore", "Errore nell'esportazione dei dati")
     
     def import_form_data(self):
         """Importa i dati del form"""
-        from tkinter import filedialog
-        
-        file_path = filedialog.askopenfilename(
-            title="Importa Dati Form",
-            filetypes=[("JSON files", "*.json")]
+        file_path, _ = QFileDialog.getOpenFileName(
+            self.form_window,
+            "Importa Dati Form",
+            "",
+            "JSON files (*.json)"
         )
         
         if file_path:
             if self.form_editor.import_form_data(file_path):
-                messagebox.showinfo("Successo", "Dati form importati correttamente")
+                QMessageBox.information(self.form_window, "Successo", "Dati form importati correttamente")
                 self.refresh_fields_list()
             else:
-                messagebox.showerror("Errore", "Errore nell'importazione dei dati")
+                QMessageBox.critical(self.form_window, "Errore", "Errore nell'importazione dei dati")
     
     def validate_form(self):
         """Valida il form"""
-        self.validation_text.delete('1.0', 'end')
+        self.validation_text.clear()
         
         is_valid, errors = self.form_editor.validate_form()
         
         if is_valid:
-            self.validation_text.insert('1.0', "✓ FORM VALIDO\n\nTutti i campi sono compilati correttamente.")
+            self.validation_text.append("✓ FORM VALIDO\n\nTutti i campi sono compilati correttamente.")
         else:
-            self.validation_text.insert('1.0', "✗ ERRORI NEL FORM\n\n")
+            self.validation_text.append("✗ ERRORI NEL FORM\n\n")
             for i, error in enumerate(errors, 1):
-                self.validation_text.insert('end', f"{i}. {error}\n")
+                self.validation_text.append(f"{i}. {error}")
     
     def preview_field(self):
         """Anteprima del campo da creare"""
-        field_type = self.field_type.get()
-        field_name = self.field_name_entry.get().strip()
-        default_value = self.default_value_entry.get()
+        # Get selected field type
+        field_type = "text"
+        for button in self.field_type_group.buttons():
+            if button.isChecked():
+                field_type = button.property("value")
+                break
+        
+        field_name = self.field_name_entry.text().strip()
+        default_value = self.default_value_entry.text()
         
         info = f"Tipo: {field_type}\nNome: {field_name}\nValore Default: {default_value}"
         
-        messagebox.showinfo("Anteprima Campo", info)
+        QMessageBox.information(self.form_window, "Anteprima Campo", info)
     
     def close_form_editor(self):
         """Chiude l'editor form"""
-        self.form_window.destroy()
+        if self.form_window:
+            self.form_window.close()
+            self.form_window = None
         self.form_window = None
