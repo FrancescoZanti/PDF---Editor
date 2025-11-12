@@ -13,7 +13,7 @@ Una potente applicazione desktop per modificare file PDF sviluppata in Python co
 
 | Interfaccia Moderna | Con Contenuto |
 |:-------------------:|:-------------:|
-| ![PDF Editor UI](assets/pyside6_modern_ui.png) | ![PDF Editor con contenuto](assets/pyside6_with_content.png) |
+| ![PDF Editor UI](https://github.com/user-attachments/assets/b3f8926d-561b-4b2d-94f9-ad17cb4f20e9) | ![PDF Editor con contenuto](https://github.com/user-attachments/assets/e6018c4f-ac22-47b0-84c5-611b3425f681) |
 
 ## 📑 Indice
 
