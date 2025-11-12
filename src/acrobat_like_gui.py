@@ -130,6 +130,12 @@ class AcrobatLikeGUI(QMainWindow):
         paste_action.triggered.connect(self.paste)
         edit_menu.addAction(paste_action)
         
+        edit_menu.addSeparator()
+        
+        modify_text_action = QAction("Modifica testo annotazione", self)
+        modify_text_action.triggered.connect(self.modify_text_annotation)
+        edit_menu.addAction(modify_text_action)
+        
         # Menu Visualizza
         view_menu = menubar.addMenu("Visualizza")
         
@@ -206,6 +212,17 @@ class AcrobatLikeGUI(QMainWindow):
         circle_action = QAction("⭕ Cerchio", self)
         circle_action.triggered.connect(lambda: self.set_tool("circle"))
         toolbar.addAction(circle_action)
+        
+        toolbar.addSeparator()
+        
+        # Strumenti per immagini e rimozione
+        image_action = QAction("🖼️ Immagine", self)
+        image_action.triggered.connect(lambda: self.set_tool("image"))
+        toolbar.addAction(image_action)
+        
+        delete_action = QAction("🗑️ Elimina", self)
+        delete_action.triggered.connect(lambda: self.set_tool("delete"))
+        toolbar.addAction(delete_action)
         
         toolbar.addSeparator()
         
@@ -291,7 +308,9 @@ class AcrobatLikeGUI(QMainWindow):
             ("Testo", "text"),
             ("Evidenzia", "highlight"),
             ("Nota", "note"),
-            ("Forma", "rectangle")
+            ("Forma", "rectangle"),
+            ("Immagine", "image"),
+            ("Elimina", "delete")
         ]
         
         for text, tool in tool_buttons:
@@ -566,6 +585,10 @@ class AcrobatLikeGUI(QMainWindow):
             self.add_text_at_position(pdf_x, pdf_y)
         elif self.current_tool == "note":
             self.add_note_at_position(pdf_x, pdf_y)
+        elif self.current_tool == "image":
+            self.add_image_at_position(pdf_x, pdf_y)
+        elif self.current_tool == "delete":
+            self.delete_at_position(pdf_x, pdf_y)
         elif self.current_tool in ["rectangle", "circle", "line", "arrow"]:
             self.draw_start_x = pdf_x
             self.draw_start_y = pdf_y
@@ -637,6 +660,107 @@ class AcrobatLikeGUI(QMainWindow):
             self.pdf_editor.add_note(self.pdf_editor.page_num, x, y, content)
             self.update_display()
     
+    def add_image_at_position(self, start_x, start_y):
+        """Aggiunge un'immagine alla posizione specificata"""
+        # Apri dialog per selezionare immagine
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Seleziona immagine",
+            "",
+            "Immagini (*.png *.jpg *.jpeg *.bmp *.gif)"
+        )
+        
+        if file_path:
+            # Chiedi dimensioni dell'immagine
+            width, ok = QInputDialog.getInt(self, "Dimensione immagine", "Larghezza (punti):", 200, 10, 1000)
+            if ok:
+                height, ok = QInputDialog.getInt(self, "Dimensione immagine", "Altezza (punti):", 200, 10, 1000)
+                if ok:
+                    import fitz
+                    rect = fitz.Rect(start_x, start_y, start_x + width, start_y + height)
+                    if self.pdf_editor.add_image(self.pdf_editor.page_num, rect, file_path):
+                        self.update_display()
+                        self.status_label.setText("Immagine aggiunta con successo")
+                    else:
+                        QMessageBox.critical(self, "Errore", "Impossibile aggiungere l'immagine")
+    
+    def delete_at_position(self, x, y):
+        """Elimina elemento alla posizione specificata"""
+        page_num = self.pdf_editor.page_num
+        
+        # Menu per scegliere cosa eliminare
+        from PySide6.QtWidgets import QMenu
+        menu = QMenu(self)
+        
+        text_action = menu.addAction("Rimuovi testo (copri con bianco)")
+        redact_action = menu.addAction("Rimuovi testo (redazione permanente)")
+        annot_action = menu.addAction("Elimina annotazione")
+        image_action = menu.addAction("Elimina immagine")
+        
+        action = menu.exec(self.canvas_label.mapToGlobal(QPoint(int(x * self.pdf_editor.zoom_level), 
+                                                                  int(y * self.pdf_editor.zoom_level))))
+        
+        if action == text_action or action == redact_action:
+            # Chiedi area di selezione
+            width, ok = QInputDialog.getInt(self, "Area di rimozione", "Larghezza (punti):", 100, 10, 1000)
+            if ok:
+                height, ok = QInputDialog.getInt(self, "Area di rimozione", "Altezza (punti):", 50, 10, 1000)
+                if ok:
+                    import fitz
+                    rect = fitz.Rect(x, y, x + width, y + height)
+                    
+                    if action == text_action:
+                        if self.pdf_editor.cover_text_with_white(page_num, rect):
+                            self.update_display()
+                            self.status_label.setText("Testo coperto con successo")
+                        else:
+                            QMessageBox.critical(self, "Errore", "Impossibile coprire il testo")
+                    else:  # redact_action
+                        if self.pdf_editor.redact_text(page_num, rect):
+                            self.update_display()
+                            self.status_label.setText("Testo rimosso con successo")
+                        else:
+                            QMessageBox.critical(self, "Errore", "Impossibile rimuovere il testo")
+        
+        elif action == annot_action:
+            # Ottieni annotazioni sulla pagina
+            annotations = self.pdf_editor.get_annotations(page_num)
+            if not annotations:
+                QMessageBox.information(self, "Info", "Nessuna annotazione trovata su questa pagina")
+                return
+            
+            # Mostra lista di annotazioni
+            annot_list = [f"{i}: {a['type']} - {a['content'][:30]}" for i, a in enumerate(annotations)]
+            annot_str, ok = QInputDialog.getItem(self, "Elimina annotazione", 
+                                                  "Seleziona annotazione:", annot_list, 0, False)
+            if ok:
+                annot_index = int(annot_str.split(":")[0])
+                if self.pdf_editor.delete_annotation(page_num, annot_index):
+                    self.update_display()
+                    self.status_label.setText("Annotazione eliminata")
+                else:
+                    QMessageBox.critical(self, "Errore", "Impossibile eliminare l'annotazione")
+        
+        elif action == image_action:
+            # Ottieni immagini sulla pagina
+            images = self.pdf_editor.get_images_on_page(page_num)
+            if not images:
+                QMessageBox.information(self, "Info", "Nessuna immagine trovata su questa pagina")
+                return
+            
+            # Mostra lista di immagini
+            image_list = [f"{i}: Immagine xref={img['xref']}" for i, img in enumerate(images)]
+            image_str, ok = QInputDialog.getItem(self, "Elimina immagine", 
+                                                  "Seleziona immagine:", image_list, 0, False)
+            if ok:
+                img_index = int(image_str.split(":")[0])
+                xref = images[img_index]['xref']
+                if self.pdf_editor.delete_image_by_xref(page_num, xref):
+                    self.update_display()
+                    self.status_label.setText("Immagine eliminata")
+                else:
+                    QMessageBox.critical(self, "Errore", "Impossibile eliminare l'immagine")
+    
     # Metodi placeholder per le funzionalità del menu
     def undo(self):
         self.status_label.setText("Annulla - non ancora implementato")
@@ -655,6 +779,36 @@ class AcrobatLikeGUI(QMainWindow):
     
     def show_properties(self):
         self.status_label.setText("Proprietà - non ancora implementato")
+    
+    def modify_text_annotation(self):
+        """Modifica il testo di un'annotazione esistente"""
+        if not self.pdf_editor.current_doc:
+            QMessageBox.warning(self, "Attenzione", "Nessun PDF aperto")
+            return
+        
+        page_num = self.pdf_editor.page_num
+        annotations = self.pdf_editor.get_annotations(page_num)
+        
+        if not annotations:
+            QMessageBox.information(self, "Info", "Nessuna annotazione trovata su questa pagina")
+            return
+        
+        # Mostra lista di annotazioni
+        annot_list = [f"{i}: {a['type']} - {a['content'][:50]}" for i, a in enumerate(annotations)]
+        annot_str, ok = QInputDialog.getItem(self, "Modifica annotazione", 
+                                              "Seleziona annotazione:", annot_list, 0, False)
+        if ok:
+            annot_index = int(annot_str.split(":")[0])
+            old_content = annotations[annot_index]['content']
+            
+            new_text, ok = QInputDialog.getText(self, "Modifica testo", 
+                                                 "Nuovo testo:", text=old_content)
+            if ok:
+                if self.pdf_editor.modify_text_annotation(page_num, annot_index, new_text):
+                    self.update_display()
+                    self.status_label.setText("Annotazione modificata")
+                else:
+                    QMessageBox.critical(self, "Errore", "Impossibile modificare l'annotazione")
 
 def main():
     from PySide6.QtWidgets import QApplication
