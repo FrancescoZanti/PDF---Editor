@@ -2,42 +2,29 @@
 
 Una potente applicazione desktop per modificare file PDF con funzionalità avanzate simili ad **Adobe Acrobat DC**, sviluppata in Python con interfaccia moderna **PySide6 (Qt)** e completamente compatibile con Windows.
 
-## 🆚 Base vs Pro - Scegli la Versione Giusta
+## 🌟 NOVITÀ PDF EDITOR PRO v3.0 - Soluzione Unificata
 
-| Caratteristica | PDF Editor Base | PDF Editor Pro |
-|----------------|-----------------|----------------|
-| **Launcher** | `pdf_editor.py` | `pdf_editor_pro.py` |
-| **Interfaccia** | PySide6 moderna | PySide6 professionale |
-| **Unisci/Dividi PDF** | ✅ | ✅ |
-| **Ruota/Estrai Pagine** | ✅ | ✅ |
-| **Watermark Base** | ✅ | ✅ Avanzato |
-| **Conversione Immagini** | ✅ | ✅ |
-| **Editing Visuale** | ❌ | ✅ |
-| **Annotazioni/Markup** | ❌ | ✅ |
-| **Form Interattivi** | ❌ | ✅ |
-| **Crittografia/Password** | ❌ | ✅ |
-| **Firma Digitale** | ❌ | ✅ |
-| **Ideale per** | Operazioni veloci | Editing professionale |
+### ✨ Interfaccia Unificata
+**PDF Editor Pro** ora si apre direttamente con l'**Editor Avanzato** pronto all'uso, senza necessità di scegliere tra diverse modalità. L'applicazione è stata unificata per offrire un'esperienza più fluida e professionale.
 
-**💡 Consiglio**: Inizia con la versione Base per familiarizzare, poi passa alla Pro per funzionalità avanzate.
-
-## 🌟 NOVITÀ PDF EDITOR PRO v2.0
-
-### ✨ Tre Modalità di Utilizzo
-
-1. **🎯 EDITOR AVANZATO** - Interfaccia stile Adobe Acrobat con PySide6
-2. **📝 EDITOR BASE** - Funzioni essenziali semplificate  
-3. **📋 EDITOR FORM** - Specializzato per form interattivi
+### 🎯 Avvio Rapido
+Basta eseguire `python pdf_editor_pro.py` e l'applicazione si apre immediatamente con l'editor completo, pronto per modificare i tuoi PDF.
 
 ## 🚀 Funzionalità Principali
 
-### 📝 **Editing Avanzato (Nuovo!)**
-- **Editing visuale interattivo** - Clicca e modifica direttamente nel PDF
-- **Aggiunta testo** - Inserisci testo ovunque con controllo font e dimensione
-- **Inserimento immagini** - Trascina e inserisci immagini nel PDF
-- **Modifica esistente** - Modifica testo e immagini già presenti
+### 📝 **Editing Testo Completo**
+- **Aggiunta testo** ✅ - Inserisci testo ovunque con controllo font, dimensione e colore
+- **Modifica testo** ✅ - Modifica il contenuto delle annotazioni di testo esistenti
+- **Rimozione testo** ✅ - Due opzioni:
+  - Copertura con rettangolo bianco (reversibile)
+  - Redazione permanente (rimozione definitiva)
 
-### 🎨 **Sistema Annotazioni Completo (Nuovo!)**
+### 🖼️ **Gestione Immagini Avanzata**
+- **Aggiunta immagini** ✅ - Inserisci immagini (PNG, JPG, BMP, GIF) con dimensioni personalizzabili
+- **Rimozione immagini** ✅ - Elimina immagini esistenti dal documento
+- **Posizionamento preciso** - Scegli esattamente dove posizionare le immagini
+
+### 🎨 **Sistema Annotazioni Completo**
 - **Evidenziatori** - Evidenzia testo con colori personalizzabili
 - **Note adesive** - Aggiungi note popup cliccabili
 - **Disegno a mano libera** - Disegna direttamente sul PDF
@@ -119,65 +106,84 @@ python test_simple.py
 
 ### **Avvio Applicazione**
 
-#### **Metodo 1: Selettore Modalità (Raccomandato)**
+#### **Metodo Raccomandato: Avvio Diretto**
 ```bash
 python pdf_editor_pro.py
 ```
-Apre una finestra di selezione per scegliere la modalità desiderata.
+L'applicazione si apre direttamente con l'**Editor Avanzato** pronto per modificare PDF.
 
-#### **Metodo 2: Editor Avanzato Diretto**
-```bash
-python src/acrobat_like_gui.py
-```
-
-#### **Metodo 3: Editor Base**
-```bash
-python pdf_editor.py
-```
-
-#### **Metodo 4: Launcher Windows**
+#### **Metodo 2: Launcher Windows**
 ```bash
 # Doppio click su:
-avvia_pdf_editor.bat
+avvia_pdf_editor_pro.bat
 # oppure
 Avvia_PDF_Editor.ps1
 ```
 
-### **Esempi di Utilizzo Avanzato**
+#### **Metodo 3: Esecuzione da Sorgente**
+```bash
+cd src
+python acrobat_like_gui.py
+```
 
-#### **Annotazioni Professionali**
-1. Apri PDF nell'Editor Avanzato
-2. Seleziona strumento "Evidenzia"
-3. Scegli colore dal selettore
-4. Clicca e trascina sul testo da evidenziare
-5. Aggiungi note cliccando su "Nota"
-6. Salva PDF con annotazioni
+### **Workflow di Utilizzo Tipico**
 
-#### **Creazione Form Interattivi**
-1. Apri "Editor Form" dalla schermata principale
-2. Seleziona tipo campo (testo, checkbox, ecc.)
-3. Inserisci nome campo e proprietà
-4. Clicca "Crea Campo" e seleziona area nel PDF
-5. Ripeti per tutti i campi necessari
-6. Esporta/importa dati form in JSON
+1. **Avvia l'applicazione** con `python pdf_editor_pro.py`
+2. **Apri un PDF** dal menu File → Apri PDF
+3. **Seleziona uno strumento** dalla toolbar:
+   - 📝 **Testo** - Clicca dove vuoi aggiungere testo
+   - 🖼️ **Immagine** - Clicca per inserire un'immagine
+   - 🗑️ **Elimina** - Rimuovi testo, annotazioni o immagini
+   - 🖍️ **Evidenzia** - Evidenzia parti del documento
+   - 📋 **Nota** - Aggiungi note adesive
+4. **Salva le modifiche** dal menu File → Salva come
 
-#### **Sicurezza Documento**
-1. Nell'Editor Avanzato, vai al menu "Strumenti"
-2. Seleziona "Sicurezza PDF"
-3. Tab "Crittografia": imposta password
-4. Tab "Permessi": configura accessi
-5. Tab "Firma Digitale": aggiungi firma
-6. Tab "Avanzate": watermark e timbri
+### **Esempi di Utilizzo**
+
+#### **Aggiungere Testo**
+1. Seleziona strumento "Testo" (T) dalla toolbar
+2. Clicca nel punto dove vuoi inserire il testo
+3. Digita il testo nel dialog che appare
+4. Il testo viene aggiunto con font e colore selezionati
+
+#### **Modificare Testo Esistente**
+1. Menu Modifica → Modifica testo annotazione
+2. Seleziona l'annotazione da modificare
+3. Inserisci il nuovo testo
+4. Le modifiche vengono applicate immediatamente
+
+#### **Rimuovere Testo**
+1. Seleziona strumento "Elimina" (🗑️) dalla toolbar
+2. Clicca nell'area dove vuoi rimuovere il testo
+3. Scegli il metodo:
+   - **Copri con bianco** - Nasconde il testo (reversibile)
+   - **Redazione permanente** - Rimuove definitivamente
+4. Specifica le dimensioni dell'area
+5. Il testo viene rimosso
+
+#### **Inserire Immagini**
+1. Seleziona strumento "Immagine" (🖼️) dalla toolbar
+2. Clicca dove vuoi posizionare l'immagine
+3. Seleziona il file immagine (PNG, JPG, BMP, GIF)
+4. Specifica larghezza e altezza
+5. L'immagine viene inserita nel documento
+
+#### **Rimuovere Immagini**
+1. Seleziona strumento "Elimina" (🗑️) dalla toolbar
+2. Clicca nell'area dell'immagine
+3. Scegli "Elimina immagine" dal menu
+4. Seleziona l'immagine da rimuovere dalla lista
+5. L'immagine viene eliminata dal PDF
 
 ## 📂 Struttura Progetto
 
 ```
 PDF-Editor/
-├── 🎯 pdf_editor_pro.py         # ← NUOVO: Launcher con selezione modalità
-├── 📝 pdf_editor.py             # Editor base originale  
+├── 🎯 pdf_editor_pro.py         # ← UNIFICATO: Launcher dell'Editor Avanzato
+├── 📝 pdf_editor.py             # Editor base (funzionalità essenziali)  
 ├── 📂 src/
-│   ├── 🆕 acrobat_like_gui.py   # Interfaccia stile Acrobat
-│   ├── 🆕 advanced_pdf_editor.py # Engine editing avanzato
+│   ├── 🆕 acrobat_like_gui.py   # Interfaccia unificata stile Acrobat
+│   ├── 🆕 advanced_pdf_editor.py # Engine editing avanzato con tutte le funzionalità
 │   ├── 🆕 pdf_form_editor.py    # Editor form interattivi
 │   ├── 🆕 pdf_security.py       # Sicurezza e crittografia
 │   ├── main.py                  # Applicazione base
@@ -185,16 +191,38 @@ PDF-Editor/
 │   └── ui_components.py         # Componenti UI
 ├── 📄 requirements.txt          # Dipendenze aggiornate
 ├── 🧪 test_simple.py           # Test diagnostico
-├── 📖 README.md                # Questa documentazione
-└── 📋 ISTRUZIONI_AVVIO.md      # Guida avvio dettagliata
+├── 📖 README.md                # Documentazione generale
+└── 📖 README_PRO.md            # Questa documentazione
+
+**NOTA:** pdf_editor_pro.py ora è l'**unico punto di accesso** all'editor avanzato.
+Non è più necessario scegliere tra diverse modalità - l'applicazione si apre
+direttamente pronta per modificare i PDF.
 ```
+
+## 🆚 Base vs Pro
+
+| Caratteristica | PDF Editor Base | PDF Editor Pro |
+|----------------|-----------------|----------------|
+| **Launcher** | `pdf_editor.py` | `pdf_editor_pro.py` |
+| **Interfaccia** | PySide6 base | PySide6 professionale |
+| **Unisci/Dividi PDF** | ✅ | ✅ |
+| **Ruota/Estrai Pagine** | ✅ | ✅ |
+| **Watermark** | ✅ Base | ✅ Avanzato |
+| **Conversione Immagini** | ✅ | ✅ |
+| **Editing Testo** | ❌ | ✅ Completo |
+| **Editing Immagini** | ❌ | ✅ Completo |
+| **Annotazioni/Markup** | ❌ | ✅ |
+| **Form Interattivi** | ❌ | ✅ |
+| **Crittografia/Password** | ❌ | ✅ |
+| **Firma Digitale** | ❌ | ✅ |
+| **Ideale per** | Operazioni veloci | Editing professionale |
 
 ## 🔬 Tecnologie Utilizzate
 
 ### **Core**
 - **Python 3.8+** - Linguaggio principale
 - **PySide6 (Qt 6)** - Framework GUI moderno per interfaccia professionale Windows 11
-- **PyMuPDF (fitz)** - Engine PDF avanzato per editing visuale
+- **PyMuPDF (fitz)** - Engine PDF avanzato per editing visuale e manipolazione contenuti
 - **Pillow (PIL)** - Elaborazione immagini avanzata
 
 ### **Sicurezza**
@@ -211,21 +239,37 @@ PDF-Editor/
 - **pdf2image** - Conversione PDF in immagini per anteprima
 - **reportlab** - Generazione PDF e watermark
 
-## 🆚 Confronto Versioni
+## 🔄 Nuove Funzionalità v3.0
 
-| Funzionalità | Editor Base | Editor Avanzato | Editor Form |
-|--------------|-------------|-----------------|-------------|
-| Unisci/Dividi PDF | ✅ | ✅ | ✅ |
-| Rotazione | ✅ | ✅ | ✅ |
-| Estrazione | ✅ | ✅ | ✅ |
-| **Editing visuale** | ❌ | ✅ | ✅ |
-| **Annotazioni** | ❌ | ✅ | ✅ |
-| **Form interattivi** | ❌ | ✅ | ✅ |
-| **Sicurezza avanzata** | ❌ | ✅ | ✅ |
-| **Crittografia** | ❌ | ✅ | ✅ |
-| **Firma digitale** | ❌ | ✅ | ✅ |
-| Facilità d'uso | ⭐⭐⭐ | ⭐⭐ | ⭐⭐ |
-| Funzionalità | ⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+### **Gestione Testo Avanzata**
+- `add_text()` - Aggiunge nuovo testo con font e colore personalizzabili
+- `modify_text_annotation()` - Modifica il contenuto delle annotazioni esistenti
+- `redact_text()` - Rimozione permanente di testo (redaction)
+- `cover_text_with_white()` - Copertura reversibile del testo
+
+### **Gestione Immagini Completa**
+- `add_image()` - Inserisce immagini con posizionamento e dimensioni precise
+- `get_images_on_page()` - Lista tutte le immagini presenti
+- `delete_image_by_xref()` - Rimuove immagini selezionate
+
+### **Interfaccia Unificata**
+- Avvio diretto nell'Editor Avanzato
+- Toolbar completa con strumenti testo, immagine ed eliminazione
+- Menu contestuali per operazioni rapide
+- Supporto completo per tutte le operazioni richieste
+
+## 🆚 Confronto con Versione Precedente
+
+| Funzionalità | Versione 2.0 | Versione 3.0 (Attuale) |
+|--------------|--------------|------------------------|
+| Avvio | Selezione modalità | Diretto nell'editor |
+| Aggiunta testo | ✅ | ✅ |
+| Modifica testo | ❌ | ✅ |
+| Rimozione testo | ❌ | ✅ |
+| Aggiunta immagini | Limitato | ✅ Completo |
+| Rimozione immagini | ❌ | ✅ |
+| Interfaccia | 3 modalità separate | Unificata |
+| Usabilità | Medio | Alto |
 
 ## 🚨 Risoluzione Problemi
 
