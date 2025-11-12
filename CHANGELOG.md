@@ -11,7 +11,7 @@ e questo progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/)
 - Compressione PDF intelligente
 - Batch processing per file multipli
 - OCR per riconoscimento testo
-- Tema scuro completo
+- Tema scuro completo con personalizzazione avanzata
 - Drag & drop per file
 
 ## [3.0.0] - 2025-11
@@ -30,12 +30,18 @@ Questa release segna la migrazione completa dell'applicazione da tkinter a PySid
   - Sistema annotazioni completo (evidenziatori, note, disegni)
   - Editor form interattivi (campi testo, checkbox, dropdown)
   - Sicurezza avanzata (crittografia, password, firme digitali)
+- 🌗 **Tema Chiaro/Scuro Automatico**:
+  - Rilevamento automatico del tema di sistema Windows 10/11
+  - Supporto per modalità chiara, scura e automatica
+  - Configurazione persistente delle preferenze tema
+  - Documentazione dedicata in TEMA_AUTOMATICO.md
 - 📚 **Documentazione completa** migliorata:
   - README.md aggiornato con FAQ e troubleshooting dettagliato
   - CONTRIBUTING.md per linee guida contribuzione
   - CHANGELOG.md per cronologia versioni
   - GUIDA_RAPIDA.md per funzionalità Pro
   - ISTRUZIONI_AVVIO.md dettagliate
+  - TEMA_AUTOMATICO.md per guida al tema chiaro/scuro automatico
 - 🧪 **Test diagnostici** (`test_simple.py`)
 - 🚀 **Launcher multipli** (batch, PowerShell, Python script)
 

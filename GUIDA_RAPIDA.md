@@ -86,7 +86,7 @@ L'applicazione installerà automaticamente:
 - Menu `Opzioni > Preferenze`
 - Modalità predefinita all'avvio
 - Percorsi di salvataggio preferiti
-- Tema interfaccia (futuro)
+- **🌗 Tema interfaccia** - Supporto automatico chiaro/scuro (vedi [TEMA_AUTOMATICO.md](TEMA_AUTOMATICO.md))
 
 ### Configurazione Persistente
 - Le impostazioni sono salvate automaticamente
