@@ -9,6 +9,8 @@ from PIL import Image
 import io
 import os
 from advanced_pdf_editor import AdvancedPDFEditor
+from theme_manager import theme_manager
+from user_config import user_config
 import fitz
 
 class AcrobatLikeGUI(QMainWindow):
@@ -16,7 +18,15 @@ class AcrobatLikeGUI(QMainWindow):
         super().__init__(parent)
         self.setWindowTitle("PDF Editor Pro - Advanced PDF Editor")
         self.resize(1200, 800)
-        self.setStyleSheet("background-color: #f0f0f0;")
+        
+        # Applica il tema
+        theme_setting = user_config.get("theme", "auto")
+        if theme_setting == "auto":
+            current_theme = theme_manager.get_theme()
+        else:
+            current_theme = theme_setting
+            theme_manager.current_theme = current_theme
+        self.setStyleSheet(theme_manager.get_stylesheet())
         
         # Editor PDF avanzato
         self.pdf_editor = AdvancedPDFEditor()

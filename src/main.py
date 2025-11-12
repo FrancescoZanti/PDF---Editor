@@ -9,6 +9,8 @@ import os
 from pathlib import Path
 from pdf_manager import PDFManager
 from ui_components import UIComponents
+from theme_manager import theme_manager
+from user_config import user_config
 
 class PDFEditor(QMainWindow):
     def __init__(self):
@@ -25,50 +27,28 @@ class PDFEditor(QMainWindow):
         # Configura l'interfaccia
         self.setup_ui()
         
-        # Applica lo stile moderno Windows 11
-        self.apply_modern_style()
+        # Applica il tema basato sulle impostazioni
+        self.apply_theme()
+        
+    def apply_theme(self):
+        """Applica il tema in base alle impostazioni utente e di sistema"""
+        # Determina quale tema usare
+        theme_setting = user_config.get("theme", "auto")
+        
+        if theme_setting == "auto":
+            # Usa il tema di sistema rilevato automaticamente
+            current_theme = theme_manager.get_theme()
+        else:
+            # Usa il tema specificato dall'utente
+            current_theme = theme_setting
+            theme_manager.current_theme = current_theme
+        
+        # Applica lo stylesheet globale
+        self.setStyleSheet(theme_manager.get_stylesheet())
         
     def apply_modern_style(self):
-        """Applica uno stile moderno compatibile con Windows 11"""
-        self.setStyleSheet("""
-            QMainWindow {
-                background-color: #f5f5f5;
-            }
-            QGroupBox {
-                font-weight: bold;
-                border: 2px solid #e0e0e0;
-                border-radius: 8px;
-                margin-top: 10px;
-                padding-top: 10px;
-                background-color: white;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                subcontrol-position: top left;
-                padding: 0 5px;
-                color: #2c3e50;
-            }
-            QTextEdit {
-                background-color: white;
-                border: 1px solid #e0e0e0;
-                border-radius: 5px;
-                padding: 5px;
-            }
-            QScrollBar:vertical {
-                border: none;
-                background: #f0f0f0;
-                width: 10px;
-                border-radius: 5px;
-            }
-            QScrollBar::handle:vertical {
-                background: #c0c0c0;
-                border-radius: 5px;
-                min-height: 20px;
-            }
-            QScrollBar::handle:vertical:hover {
-                background: #a0a0a0;
-            }
-        """)
+        """Metodo legacy - ora usa apply_theme()"""
+        self.apply_theme()
         
     def setup_ui(self):
         """Configura l'interfaccia utente principale"""
@@ -82,17 +62,13 @@ class PDFEditor(QMainWindow):
         # Titolo
         title_frame = QFrame()
         title_frame.setFixedHeight(60)
-        title_frame.setStyleSheet("""
-            QFrame {
-                background-color: #2c3e50;
-            }
-        """)
+        title_frame.setStyleSheet(theme_manager.get_title_frame_style())
         title_layout = QVBoxLayout(title_frame)
         title_layout.setContentsMargins(0, 0, 0, 0)
         
         title_label = QLabel("PDF EDITOR")
         title_label.setFont(QFont('Arial', 20, QFont.Bold))
-        title_label.setStyleSheet("color: white;")
+        title_label.setStyleSheet(theme_manager.get_title_label_style())
         title_label.setAlignment(Qt.AlignCenter)
         title_layout.addWidget(title_label)
         

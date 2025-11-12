@@ -26,6 +26,7 @@ try:
     from pdf_form_editor import FormEditorGUI
     from pdf_security import SecurityGUI
     from user_config import user_config
+    from theme_manager import theme_manager
     
     ADVANCED_FEATURES = True
 except ImportError as e:
@@ -34,8 +35,10 @@ except ImportError as e:
     try:
         from main import main as basic_main
         from user_config import user_config
+        from theme_manager import theme_manager
     except ImportError:
         user_config = None
+        theme_manager = None
     ADVANCED_FEATURES = False
 
 class FeatureSelectionDialog(QDialog):
@@ -44,7 +47,18 @@ class FeatureSelectionDialog(QDialog):
         super().__init__()
         self.setWindowTitle("PDF Editor Pro - Selezione Modalità")
         self.resize(600, 600)
-        self.setStyleSheet("background-color: #f0f0f0;")
+        
+        # Applica il tema
+        if theme_manager:
+            theme_setting = user_config.get("theme", "auto") if user_config else "auto"
+            if theme_setting == "auto":
+                current_theme = theme_manager.get_theme()
+            else:
+                current_theme = theme_setting
+                theme_manager.current_theme = current_theme
+            self.setStyleSheet(theme_manager.get_stylesheet())
+        else:
+            self.setStyleSheet("background-color: #f0f0f0;")
         
         # Centra la finestra
         screen_geometry = QApplication.primaryScreen().geometry()

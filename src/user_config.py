@@ -15,7 +15,7 @@ class UserConfig:
             "max_recent_files": 10,
             "window_size": "1200x800",
             "window_position": "center",
-            "theme": "light",  # light, dark
+            "theme": "auto",  # auto, light, dark
             "default_save_location": str(Path.home() / "Desktop"),
             "auto_backup": True,
             "backup_location": str(Path.home() / "Documents" / "PDF_Editor_Backups"),
