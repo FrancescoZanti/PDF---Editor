@@ -5,6 +5,8 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineE
                                QTabWidget, QFrame, QInputDialog, QDialog)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
+from theme_manager import theme_manager
+from user_config import user_config
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
@@ -341,7 +343,15 @@ class SecurityGUI(QWidget):
         self.security_window = QDialog(self.parent)
         self.security_window.setWindowTitle("Sicurezza PDF")
         self.security_window.resize(500, 600)
-        self.security_window.setStyleSheet("background-color: #f0f0f0;")
+        
+        # Applica il tema
+        theme_setting = user_config.get("theme", "auto")
+        if theme_setting == "auto":
+            current_theme = theme_manager.get_theme()
+        else:
+            current_theme = theme_setting
+            theme_manager.current_theme = current_theme
+        self.security_window.setStyleSheet(theme_manager.get_stylesheet())
         
         self.setup_security_ui()
         
@@ -356,7 +366,6 @@ class SecurityGUI(QWidget):
         title_label = QLabel("SICUREZZA PDF")
         title_label.setFont(QFont('Arial', 14, QFont.Bold))
         title_label.setAlignment(Qt.AlignCenter)
-        title_label.setStyleSheet("background-color: #f0f0f0;")
         layout.addWidget(title_label)
         
         # Tab widget per organizzare le funzioni

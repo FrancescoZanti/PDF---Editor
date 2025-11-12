@@ -9,6 +9,8 @@ from PIL import Image
 import io
 import os
 from advanced_pdf_editor import AdvancedPDFEditor
+from theme_manager import theme_manager
+from user_config import user_config
 import fitz
 
 class AcrobatLikeGUI(QMainWindow):
@@ -16,7 +18,15 @@ class AcrobatLikeGUI(QMainWindow):
         super().__init__(parent)
         self.setWindowTitle("PDF Editor Pro - Advanced PDF Editor")
         self.resize(1200, 800)
-        self.setStyleSheet("background-color: #f0f0f0;")
+        
+        # Applica il tema
+        theme_setting = user_config.get("theme", "auto")
+        if theme_setting == "auto":
+            current_theme = theme_manager.get_theme()
+        else:
+            current_theme = theme_setting
+            theme_manager.current_theme = current_theme
+        self.setStyleSheet(theme_manager.get_stylesheet())
         
         # Editor PDF avanzato
         self.pdf_editor = AdvancedPDFEditor()
@@ -57,18 +67,18 @@ class AcrobatLikeGUI(QMainWindow):
         # Pannello sinistro (navigazione e strumenti)
         self.left_panel = QWidget()
         self.left_panel.setFixedWidth(250)
-        self.left_panel.setStyleSheet("background-color: #e8e8e8;")
+        self.left_panel.setStyleSheet(theme_manager.get_panel_style("side"))
         splitter.addWidget(self.left_panel)
         
         # Area centrale (visualizzazione PDF)
         self.center_panel = QWidget()
-        self.center_panel.setStyleSheet("background-color: white;")
+        self.center_panel.setStyleSheet(theme_manager.get_panel_style("center"))
         splitter.addWidget(self.center_panel)
         
         # Pannello destro (proprietà e commenti)
         self.right_panel = QWidget()
         self.right_panel.setFixedWidth(250)
-        self.right_panel.setStyleSheet("background-color: #e8e8e8;")
+        self.right_panel.setStyleSheet(theme_manager.get_panel_style("side"))
         splitter.addWidget(self.right_panel)
         
         # Imposta dimensioni iniziali del splitter
@@ -332,7 +342,7 @@ class AcrobatLikeGUI(QMainWindow):
         # Controlli zoom
         zoom_frame = QWidget()
         zoom_frame.setFixedHeight(40)
-        zoom_frame.setStyleSheet("background-color: white;")
+        zoom_frame.setStyleSheet(theme_manager.get_panel_style("center"))
         zoom_layout = QHBoxLayout(zoom_frame)
         
         zoom_out_btn = QPushButton("🔍-")
@@ -357,11 +367,11 @@ class AcrobatLikeGUI(QMainWindow):
         # Area di visualizzazione PDF con scrolling
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
-        scroll_area.setStyleSheet("background-color: white;")
+        scroll_area.setStyleSheet(theme_manager.get_panel_style("center"))
         
         self.canvas_label = QLabel()
         self.canvas_label.setAlignment(Qt.AlignCenter)
-        self.canvas_label.setStyleSheet("background-color: white;")
+        self.canvas_label.setStyleSheet(theme_manager.get_panel_style("center"))
         
         # Abilita mouse tracking per interazioni
         self.canvas_label.setMouseTracking(True)
