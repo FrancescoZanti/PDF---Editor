@@ -219,8 +219,8 @@ Tutte le funzionalità di base e avanzate sono state migrate con successo!
 4. ✅ **src/pdf_security.py** - Dialog sicurezza, input password
 
 ### Miglioramenti Futuri
-- 🌙 **Tema scuro** - Implementare supporto completo per dark mode
-- 🎨 **Personalizzazione** - Permettere all'utente di scegliere colori
+- 🌙 **Tema scuro avanzato** - Estendere il supporto automatico light/dark con personalizzazione completa (✅ base già implementata, vedi [TEMA_AUTOMATICO.md](TEMA_AUTOMATICO.md))
+- 🎨 **Personalizzazione** - Permettere all'utente di scegliere colori personalizzati
 - 📱 **Responsive** - Migliorare il layout per diverse risoluzioni
 - 🔔 **Notifiche** - Implementare notifiche di sistema
 - 🌐 **Internazionalizzazione** - Sistema di traduzioni con Qt Linguist
