@@ -3,13 +3,13 @@
 [![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](CHANGELOG.md)
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-lightgrey.svg)](https://www.microsoft.com/windows)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-lightgrey.svg)](https://github.com/FrancescoZanti/PDF---Editor/releases)
 [![UI Framework](https://img.shields.io/badge/UI-PySide6%20(Qt)-brightgreen.svg)](https://www.qt.io/qt-for-python)
 [![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-Una potente applicazione desktop per modificare file PDF sviluppata in Python con interfaccia grafica moderna basata su **PySide6 (Qt)**, completamente compatibile con Windows 11.
+Una potente applicazione desktop per modificare file PDF sviluppata in Python con interfaccia grafica moderna basata su **PySide6 (Qt)**, completamente compatibile con Windows 10/11 e Linux.
 
-> **✨ Caratteristiche principali**: Interfaccia moderna Windows 11 • Operazioni PDF complete • Supporto alta risoluzione • Open Source MIT
+> **✨ Caratteristiche principali**: Interfaccia moderna • Operazioni PDF complete • Supporto Windows e Linux • Supporto alta risoluzione • Open Source MIT
 
 | Interfaccia Moderna | Con Contenuto |
 |:-------------------:|:-------------:|
@@ -80,7 +80,7 @@ python pdf_editor.py
 
 | Componente | Requisito Minimo | Raccomandato |
 |------------|------------------|--------------|
-| **Sistema Operativo** | Windows 10 (64-bit) | Windows 11 (64-bit) |
+| **Sistema Operativo** | Windows 10 (64-bit) / Linux (64-bit) | Windows 11 (64-bit) / Linux moderno |
 | **Python** | 3.8.0 | 3.11.0 o superiore |
 | **RAM** | 2 GB | 8 GB |
 | **Spazio Disco** | 200 MB | 500 MB |
@@ -107,11 +107,53 @@ python pdf_editor.py
 
 - ✅ **Windows 10**: Completamente supportato
 - ✅ **Windows 11**: Completamente supportato con UI ottimizzata
+- ✅ **Linux (Debian/Ubuntu)**: Supportato tramite pacchetti DEB
+- ✅ **Linux (Fedora/RHEL/CentOS)**: Supportato tramite pacchetti RPM
 - ⚠️ **Windows 8.1 e precedenti**: Non testato, potrebbe funzionare
 - ❌ **Windows 7**: Non supportato ufficialmente (manca supporto PySide6)
-- 💡 **macOS/Linux**: PySide6 è cross-platform, ma l'app è ottimizzata per Windows
+- 💡 **macOS**: PySide6 è cross-platform, ma l'app è ottimizzata per Windows/Linux
 
 ## 📦 Installazione
+
+### Metodo 0: Download Binari Precompilati (Più Semplice)
+
+Per gli utenti che vogliono semplicemente utilizzare l'applicazione senza installare Python e le dipendenze, sono disponibili pacchetti precompilati:
+
+#### Windows
+1. Vai alla [pagina Releases](https://github.com/FrancescoZanti/PDF---Editor/releases)
+2. Scarica il file `PDF-Editor.exe` dall'ultima release
+3. Esegui il file scaricato
+
+#### Linux - Debian/Ubuntu
+```bash
+# Scarica il pacchetto DEB dall'ultima release
+wget https://github.com/FrancescoZanti/PDF---Editor/releases/latest/download/pdf-editor_1.0.0_amd64.deb
+
+# Installa il pacchetto
+sudo dpkg -i pdf-editor_1.0.0_amd64.deb
+
+# Installa eventuali dipendenze mancanti
+sudo apt-get install -f
+
+# Avvia l'applicazione
+pdf-editor
+```
+
+#### Linux - Fedora/RHEL/CentOS
+```bash
+# Scarica il pacchetto RPM dall'ultima release
+wget https://github.com/FrancescoZanti/PDF---Editor/releases/latest/download/pdf-editor-1.0.0-1.x86_64.rpm
+
+# Installa il pacchetto
+sudo rpm -i pdf-editor-1.0.0-1.x86_64.rpm
+# oppure con dnf
+sudo dnf install pdf-editor-1.0.0-1.x86_64.rpm
+
+# Avvia l'applicazione
+pdf-editor
+```
+
+> **💡 Note**: I pacchetti Linux includono un eseguibile standalone e una voce nel menu applicazioni. Dopo l'installazione, puoi cercare "PDF Editor" nel launcher delle applicazioni.
 
 ### Metodo 1: Installazione Automatica (Raccomandato)
 
