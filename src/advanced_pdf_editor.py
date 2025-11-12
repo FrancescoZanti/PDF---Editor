@@ -1,7 +1,5 @@
 import fitz  # PyMuPDF
-import tkinter as tk
-from tkinter import ttk, filedialog, messagebox, colorchooser, simpledialog
-from PIL import Image, ImageTk
+from PIL import Image
 import io
 import os
 import json
