@@ -235,18 +235,43 @@ class FeatureSelectionDialog(QDialog):
                 QMessageBox.critical(self, "Errore", "Impossibile aprire il PDF")
 
 def main():
-    """Funzione principale"""
+    """Funzione principale - Apre direttamente l'editor avanzato"""
     app = QApplication.instance()
     if app is None:
         app = QApplication(sys.argv)
     
     try:
-        dialog = FeatureSelectionDialog()
-        result = dialog.exec()
-        
-        # Se l'utente ha aperto un editor, mantieni l'app in esecuzione
-        if result == QDialog.Accepted:
+        # Apri direttamente l'editor avanzato senza dialog di selezione
+        if ADVANCED_FEATURES:
+            window = AcrobatLikeGUI()
+            window.show()
+            
+            # Mostra messaggio di benvenuto
+            QMessageBox.information(
+                window,
+                "PDF Editor Pro",
+                "Benvenuto in PDF Editor Pro!\n\n"
+                "Funzionalità disponibili:\n"
+                "• Aggiungi testo\n"
+                "• Modifica testo annotazioni\n"
+                "• Rimuovi testo\n"
+                "• Aggiungi immagini\n"
+                "• Rimuovi immagini\n"
+                "• Annotazioni e disegni\n\n"
+                "Usa la toolbar per selezionare gli strumenti.\n"
+                "Inizia aprendo un PDF dal menu File."
+            )
+            
             return app.exec()
+        else:
+            QMessageBox.critical(
+                None, 
+                "Errore", 
+                "Funzionalità avanzate non disponibili.\n"
+                "Assicurati di aver installato tutte le dipendenze:\n"
+                "pip install -r requirements.txt"
+            )
+            return 1
         
     except Exception as e:
         print(f"Errore nell'avvio dell'applicazione: {e}")

@@ -338,3 +338,89 @@ class AdvancedPDFEditor:
             self.current_doc = None
             self.page_num = 0
             self.zoom_level = 1.0
+    
+    def redact_text(self, page_num, rect):
+        """Rimuove testo in una regione specifica usando redaction"""
+        if not self.current_doc:
+            return False
+            
+        try:
+            page = self.current_doc[page_num]
+            # Aggiungi area di redaction
+            page.add_redact_annot(rect)
+            # Applica redaction
+            page.apply_redactions()
+            return True
+        except Exception as e:
+            print(f"Errore nella redaction del testo: {e}")
+            return False
+    
+    def cover_text_with_white(self, page_num, rect):
+        """Copre testo con un rettangolo bianco"""
+        if not self.current_doc:
+            return False
+            
+        try:
+            page = self.current_doc[page_num]
+            # Disegna un rettangolo bianco sopra il testo
+            shape = page.new_shape()
+            shape.draw_rect(rect)
+            shape.finish(fill=(1, 1, 1), color=None)  # Bianco
+            shape.commit()
+            return True
+        except Exception as e:
+            print(f"Errore nella copertura del testo: {e}")
+            return False
+    
+    def get_images_on_page(self, page_num):
+        """Ottiene lista delle immagini nella pagina"""
+        if not self.current_doc:
+            return []
+            
+        try:
+            page = self.current_doc[page_num]
+            images = page.get_images()
+            image_list = []
+            for img_index, img in enumerate(images):
+                xref = img[0]
+                image_list.append({
+                    'index': img_index,
+                    'xref': xref,
+                    'bbox': page.get_image_bbox(img)
+                })
+            return image_list
+        except Exception as e:
+            print(f"Errore nel recupero delle immagini: {e}")
+            return []
+    
+    def delete_image_by_xref(self, page_num, xref):
+        """Elimina un'immagine dalla pagina usando il suo xref"""
+        if not self.current_doc:
+            return False
+            
+        try:
+            page = self.current_doc[page_num]
+            # Trova e rimuovi tutte le occorrenze dell'immagine
+            page.delete_image(xref)
+            return True
+        except Exception as e:
+            print(f"Errore nell'eliminazione dell'immagine: {e}")
+            return False
+    
+    def modify_text_annotation(self, page_num, annot_index, new_text):
+        """Modifica il contenuto di un'annotazione di testo"""
+        if not self.current_doc:
+            return False
+            
+        try:
+            page = self.current_doc[page_num]
+            annots = list(page.annots())
+            if 0 <= annot_index < len(annots):
+                annot = annots[annot_index]
+                annot.set_content(new_text)
+                annot.update()
+                return True
+            return False
+        except Exception as e:
+            print(f"Errore nella modifica dell'annotazione: {e}")
+            return False
