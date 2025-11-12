@@ -76,6 +76,13 @@ Basta eseguire `python pdf_editor_pro.py` e l'applicazione si apre immediatament
 - **Proprietà dinamiche** - Cambiano in base allo strumento
 - **Anteprima real-time** - Vedi modifiche immediatamente
 
+### 🌗 **Tema Chiaro/Scuro Automatico**
+- **Rilevamento automatico** - Si adatta al tema di sistema Windows 10/11
+- **Modalità personalizzabile** - Scegli tra automatico, chiaro o scuro
+- **Configurazione persistente** - Le preferenze vengono salvate
+- **Ottimizzazione leggibilità** - Colori ottimizzati per entrambi i temi
+- Vedi [TEMA_AUTOMATICO.md](TEMA_AUTOMATICO.md) per maggiori dettagli
+
 ## 📦 Requisiti di Sistema
 
 ### **Hardware Minimo**

@@ -550,7 +550,7 @@ L'applicazione mostra tutti i messaggi di errore nell'area di output in fondo al
 
 ### Versione 3.2 - Pianificata 📅
 - [ ] **OCR integrato** - Riconoscimento testo da immagini in PDF
-- [ ] **Tema scuro** - Supporto per dark mode
+- [ ] **Tema scuro avanzato** - Personalizzazione completa colori e temi (✅ base già implementata in v3.0, vedi [TEMA_AUTOMATICO.md](TEMA_AUTOMATICO.md))
 - [ ] **Esportazione multi-formato** - DOCX, TXT, HTML
 - [ ] **Confronto PDF** - Visualizza differenze tra due PDF
 - [ ] **Segnalibri e indice** - Gestione segnalibri PDF
