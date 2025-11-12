@@ -43,6 +43,7 @@ Una potente applicazione desktop per modificare file PDF sviluppata in Python co
 - **[GUIDA_RAPIDA.md](GUIDA_RAPIDA.md)** - Guida rapida funzionalità Pro
 - **[ISTRUZIONI_AVVIO.md](ISTRUZIONI_AVVIO.md)** - Istruzioni dettagliate per avviare l'applicazione
 - **[MIGRATION_NOTES.md](MIGRATION_NOTES.md)** - Note tecniche sulla migrazione a PySide6
+- **[TEMA_AUTOMATICO.md](TEMA_AUTOMATICO.md)** - ✨ Guida al tema chiaro/scuro automatico
 
 ---
 
@@ -65,6 +66,7 @@ python pdf_editor.py
 
 ## 🚀 Funzionalità Principali
 
+### Funzioni Base
 - **Unione PDF** - Combina più file PDF in un singolo documento
 - **Divisione PDF** - Dividi PDF in pagine singole o per intervalli specifici
 - **Rotazione PDF** - Ruota le pagine di 90°, 180° o 270°
@@ -73,6 +75,13 @@ python pdf_editor.py
 - **Estrazione Testo** - Estrai tutto il testo da un PDF in formato .txt
 - **Conversione Immagini** - Converti immagini (JPG, PNG, BMP, etc.) in PDF
 - **Anteprima PDF** - Visualizza i PDF con l'applicazione predefinita del sistema
+
+### ✨ Nuove Funzionalità
+- **🌗 Tema Chiaro/Scuro Automatico** - L'interfaccia si adatta automaticamente al tema di sistema di Windows 10/11
+  - Supporto completo per modalità chiara e scura
+  - Rilevamento automatico dalle impostazioni di Windows
+  - Possibilità di forzare manualmente il tema preferito
+  - Vedi [TEMA_AUTOMATICO.md](TEMA_AUTOMATICO.md) per maggiori dettagli
 
 ## 🔧 Requisiti di Sistema
 
