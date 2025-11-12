@@ -222,6 +222,21 @@ class ThemeManager:
         """Adatta il colore del pulsante al tema"""
         # I colori dei pulsanti rimangono gli stessi per mantenere la distintività
         return base_color
+    
+    def get_panel_style(self, panel_type="side"):
+        """Restituisce lo stile per i pannelli
+        panel_type: 'side' per pannelli laterali, 'center' per area centrale
+        """
+        if self.current_theme == "dark":
+            if panel_type == "center":
+                return "background-color: #2d2d2d;"
+            else:  # side panels
+                return "background-color: #252525;"
+        else:
+            if panel_type == "center":
+                return "background-color: white;"
+            else:  # side panels
+                return "background-color: #e8e8e8;"
 
 
 # Istanza globale del theme manager
