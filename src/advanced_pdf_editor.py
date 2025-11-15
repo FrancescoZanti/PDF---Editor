@@ -54,15 +54,31 @@ class AdvancedPDFEditor:
             print(f"Errore nel caricamento della pagina: {e}")
             return None
     
-    def add_text(self, page_num, x, y, text, font_size=12, color=(0, 0, 0)):
-        """Aggiunge testo alla pagina"""
+    def add_text(self, page_num, x, y, text, font_size=12, color=(0, 0, 0), font_name="helv", width=200, height=None):
+        """Aggiunge testo modificabile alla pagina usando FreeText annotation"""
         if not self.current_doc:
             return False
             
         try:
             page = self.current_doc[page_num]
-            point = fitz.Point(x, y)
-            page.insert_text(point, text, fontsize=font_size, color=color)
+            
+            # Calcola altezza automatica se non specificata
+            if height is None:
+                height = font_size * 1.5
+            
+            # Crea un rettangolo per il testo
+            rect = fitz.Rect(x, y, x + width, y + height)
+            
+            # Crea annotazione FreeText (testo modificabile)
+            annot = page.add_freetext_annot(
+                rect,
+                text,
+                fontsize=font_size,
+                fontname=font_name,
+                text_color=color,
+                fill_color=(1, 1, 1)  # Sfondo bianco
+            )
+            annot.update()
             return True
         except Exception as e:
             print(f"Errore nell'aggiunta del testo: {e}")
@@ -422,3 +438,153 @@ class AdvancedPDFEditor:
         except Exception as e:
             print(f"Errore nella modifica dell'annotazione: {e}")
             return False
+    
+    def get_text_annotations(self, page_num):
+        """
+        Ottiene tutte le annotazioni di testo (FreeText) su una pagina
+        
+        Returns:
+            Lista di dict con: {
+                'index': int,
+                'rect': fitz.Rect,
+                'text': str,
+                'font_size': float,
+                'color': tuple,
+                'font_name': str
+            }
+        """
+        if not self.current_doc:
+            return []
+            
+        try:
+            page = self.current_doc[page_num]
+            text_annots = []
+            
+            for i, annot in enumerate(page.annots()):
+                # FreeText annotations hanno type 2
+                if annot.type[0] == 2:  # PDF_ANNOT_FREE_TEXT
+                    info = {
+                        'index': i,
+                        'rect': annot.rect,
+                        'text': annot.info.get('content', ''),
+                        'font_size': annot.font_size if hasattr(annot, 'font_size') else 12,
+                        'color': annot.colors.get('stroke', (0, 0, 0)),
+                        'font_name': annot.info.get('fontname', 'helv')
+                    }
+                    text_annots.append(info)
+            
+            return text_annots
+        except Exception as e:
+            print(f"Errore nel recupero delle annotazioni di testo: {e}")
+            return []
+    
+    def modify_text_properties(self, page_num, annot_index, **kwargs):
+        """
+        Modifica tutte le proprietà di un'annotazione di testo
+        
+        Args:
+            page_num: Numero della pagina
+            annot_index: Indice dell'annotazione
+            **kwargs: Proprietà da modificare:
+                - text: nuovo contenuto testuale
+                - font_size: nuova dimensione font
+                - color: nuovo colore (r, g, b) in range 0-1
+                - font_name: nome del font ('helv', 'times', 'cour', etc.)
+                - rect: nuovo rettangolo (x0, y0, x1, y1) per spostare/ridimensionare
+                - fill_color: colore di sfondo (r, g, b)
+        
+        Returns:
+            bool: True se successo, False altrimenti
+        """
+        if not self.current_doc:
+            return False
+            
+        try:
+            page = self.current_doc[page_num]
+            annots = list(page.annots())
+            
+            if not (0 <= annot_index < len(annots)):
+                return False
+            
+            annot = annots[annot_index]
+            
+            # Verifica che sia un'annotazione FreeText
+            if annot.type[0] != 2:  # PDF_ANNOT_FREE_TEXT
+                print("L'annotazione non è di tipo FreeText")
+                return False
+            
+            # Modifica il testo
+            if 'text' in kwargs:
+                annot.set_info(content=kwargs['text'])
+            
+            # Modifica il rettangolo (posizione/dimensione)
+            if 'rect' in kwargs:
+                new_rect = kwargs['rect']
+                if isinstance(new_rect, (list, tuple)) and len(new_rect) == 4:
+                    annot.set_rect(fitz.Rect(new_rect))
+                elif isinstance(new_rect, fitz.Rect):
+                    annot.set_rect(new_rect)
+            
+            # Modifica font size
+            if 'font_size' in kwargs:
+                # Per modificare font size dobbiamo ricreare l'annotazione
+                # Salviamo le proprietà attuali
+                current_rect = annot.rect
+                current_text = annot.info.get('content', '')
+                current_color = annot.colors.get('stroke', (0, 0, 0))
+                current_fill = annot.colors.get('fill', (1, 1, 1))
+                current_font = kwargs.get('font_name', annot.info.get('fontname', 'helv'))
+                
+                # Elimina l'annotazione vecchia
+                page.delete_annot(annot)
+                
+                # Crea nuova annotazione con le proprietà aggiornate
+                new_annot = page.add_freetext_annot(
+                    current_rect,
+                    kwargs.get('text', current_text),
+                    fontsize=kwargs['font_size'],
+                    fontname=current_font,
+                    text_color=kwargs.get('color', current_color),
+                    fill_color=kwargs.get('fill_color', current_fill)
+                )
+                new_annot.update()
+            else:
+                # Se non cambiamo font size, possiamo solo aggiornare colori
+                if 'color' in kwargs:
+                    annot.set_colors(stroke=kwargs['color'])
+                if 'fill_color' in kwargs:
+                    annot.set_colors(fill=kwargs['fill_color'])
+                
+                annot.update()
+            
+            return True
+        except Exception as e:
+            print(f"Errore nella modifica delle proprietà del testo: {e}")
+            return False
+    
+    def get_annotation_at_point(self, page_num, x, y):
+        """
+        Trova l'annotazione che si trova nel punto specificato
+        
+        Args:
+            page_num: Numero della pagina
+            x, y: Coordinate del punto
+            
+        Returns:
+            tuple: (index, annotation) o (None, None) se non trovata
+        """
+        if not self.current_doc:
+            return None, None
+            
+        try:
+            page = self.current_doc[page_num]
+            point = fitz.Point(x, y)
+            
+            for i, annot in enumerate(page.annots()):
+                if annot.rect.contains(point):
+                    return i, annot
+            
+            return None, None
+        except Exception as e:
+            print(f"Errore nella ricerca dell'annotazione: {e}")
+            return None, None
