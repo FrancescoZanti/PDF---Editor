@@ -606,7 +606,7 @@ class AcrobatLikeGUI(QMainWindow):
             if result:
                 annot_index, annot = result
                 # Verifica che sia un'annotazione di testo (FreeText)
-                if annot.type[0] == 2:  # FreeText annotation
+                if annot is not None and annot.type[0] == 2:  # FreeText annotation
                     self.selected_annotation = (page_num, annot_index, annot)
                     # Doppio click apre dialog di modifica
                     if event.type() == event.Type.MouseButtonDblClick:
@@ -980,7 +980,7 @@ class AcrobatLikeGUI(QMainWindow):
                 self.status_label.setText("Proprietà testo aggiornate con successo")
                 # Aggiorna annotazione selezionata
                 result = self.pdf_editor.get_annotation_at_point(page_num, new_x + 5, new_y + 5)
-                if result:
+                if result and result[0] is not None and result[1] is not None:
                     self.selected_annotation = (page_num, result[0], result[1])
             else:
                 QMessageBox.critical(self, "Errore", "Impossibile modificare le proprietà del testo")
