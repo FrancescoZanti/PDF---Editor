@@ -112,7 +112,6 @@ git checkout -b bugfix/descrizione-bug
 python test_simple.py
 
 # Test manuale completo
-python pdf_editor.py
 python pdf_editor_pro.py
 
 # Verifica tutte le funzionalità che hai modificato
@@ -360,9 +359,9 @@ Closes #42
 Ogni contribuzione deve essere testata manualmente:
 
 1. **Avvia l'applicazione**
-   ```bash
-   python pdf_editor.py
-   ```
+    ```bash
+    python pdf_editor_pro.py
+    ```
 
 2. **Testa la funzionalità modificata**
    - Prova casi normali

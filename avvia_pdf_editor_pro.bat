@@ -26,23 +26,22 @@ if not exist "pdf_editor_pro.py" (
 
 echo Controllo dipendenze avanzate...
 python -c "import fitz, cryptography, numpy" >nul 2>&1
-if errorlevel 1 (
-    echo.
-    echo ATTENZIONE: Alcune dipendenze avanzate mancano.
-    echo Installazione delle dipendenze in corso...
-    echo.
-    pip install PyMuPDF cryptography numpy opencv-python matplotlib
     if errorlevel 1 (
         echo.
-        echo ERRORE: Impossibile installare le dipendenze avanzate.
-        echo Prova manualmente: pip install PyMuPDF cryptography numpy
+        echo ATTENZIONE: Alcune dipendenze avanzate mancano.
+        echo Installazione delle dipendenze in corso...
         echo.
-        echo Avvio in modalità base...
-        python pdf_editor.py
-        pause
-        exit /b 1
+        pip install PyMuPDF cryptography numpy opencv-python matplotlib
+        if errorlevel 1 (
+            echo.
+            echo ERRORE: Impossibile installare le dipendenze avanzate automaticamente.
+            echo Prova manualmente: pip install PyMuPDF cryptography numpy
+            echo.
+            echo Impossibile proseguire senza dipendenze necessarie. Esco.
+            pause
+            exit /b 1
+        )
     )
-)
 
 echo.
 echo Avvio PDF Editor Pro...
@@ -55,8 +54,7 @@ python pdf_editor_pro.py
 if errorlevel 1 (
     echo.
     echo L'applicazione si è chiusa con un errore.
-    echo Tentativo di avvio modalità base...
-    python pdf_editor.py
+    echo Controlla i log e riprova. Esco.
     pause
 )
 

@@ -133,7 +133,7 @@ Nuovo file di test che verifica:
 ⚠️ **Nota per utenti esistenti:**
 - Il launcher `pdf_editor_pro.py` non mostra più il dialog di selezione modalità
 - Si apre direttamente con l'Editor Avanzato
-- Gli utenti che preferivano l'Editor Base possono ancora usare `pdf_editor.py`
+- La versione Pro è ora il punto di accesso principale; la versione base non è più mantenuta
 
 ## Prossimi Passi Consigliati
 

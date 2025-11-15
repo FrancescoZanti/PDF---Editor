@@ -74,7 +74,7 @@ def test_theme_detection():
     print()
     print("📝 Note:")
     print("   • Per vedere il tema in azione, avvia l'applicazione:")
-    print("     python pdf_editor.py")
+    print("     python pdf_editor_pro.py")
     print("   • Il tema si adatta automaticamente al tema di Windows")
     print("   • Per cambiare manualmente il tema, modifica:")
     print("     C:\\Users\\[TuoNome]\\.pdf_editor_pro\\config.json")

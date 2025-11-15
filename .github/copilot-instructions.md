@@ -33,7 +33,7 @@ PDF Editor is a desktop application for PDF manipulation built with Python and P
 ```
 PDF-Editor/
 ├── src/                          # Source code
-│   ├── main.py                   # Base app entry point (PySide6)
+│   ├── main.py                   # App entry point (PySide6)
 │   ├── pdf_manager.py            # PDF operations logic
 │   ├── ui_components.py          # Reusable UI components
 │   ├── acrobat_like_gui.py       # Pro version interface
@@ -43,7 +43,6 @@ PDF-Editor/
 │   └── user_config.py            # User configuration management
 │
 ├── assets/                       # UI screenshots and resources
-├── pdf_editor.py                 # Base version launcher
 ├── pdf_editor_pro.py             # Pro version launcher
 ├── requirements.txt              # Python dependencies
 ├── test_simple.py                # Basic diagnostic tests
@@ -79,15 +78,11 @@ python test_simple.py
 
 ### Running the Application
 ```bash
-# Base version
-python pdf_editor.py
-
 # Pro version (advanced features)
 python pdf_editor_pro.py
 
-# Or use launcher scripts
-avvia_pdf_editor.bat        # Base
-avvia_pdf_editor_pro.bat    # Pro
+# Or use launcher script for Pro
+avvia_pdf_editor_pro.bat
 ```
 
 ## Code Style and Conventions
@@ -190,7 +185,7 @@ python test_simple.py
 python test_pdf_editor.py
 
 # Manual testing
-python pdf_editor.py  # Test all features manually
+ python pdf_editor_pro.py  # Test all features manually
 ```
 
 ### Testing Checklist

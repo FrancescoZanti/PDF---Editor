@@ -36,7 +36,7 @@ jobs:
             --hidden-import=pdf2image --hidden-import=reportlab `
             --hidden-import=fitz --hidden-import=pytesseract `
             --hidden-import=cryptography --hidden-import=matplotlib `
-            --hidden-import=numpy --hidden-import=cv2 pdf_editor.py
+            --hidden-import=numpy --hidden-import=cv2 pdf_editor_pro.py
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
@@ -81,7 +81,7 @@ jobs:
             --hidden-import=pdf2image --hidden-import=reportlab \
             --hidden-import=fitz --hidden-import=pytesseract \
             --hidden-import=cryptography --hidden-import=matplotlib \
-            --hidden-import=numpy --hidden-import=cv2 pdf_editor.py
+            --hidden-import=numpy --hidden-import=cv2 pdf_editor_pro.py
 
       - name: Create package structure
         run: |

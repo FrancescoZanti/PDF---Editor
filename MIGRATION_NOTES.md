@@ -16,7 +16,7 @@ Questo documento descrive la migrazione completa dell'applicazione PDF Editor da
 #### File Migrati
 1. **src/ui_components.py** - Componenti UI completamente migrati
 2. **src/main.py** - Finestra principale migrata a QMainWindow
-3. **pdf_editor.py** - Entry point aggiornato
+3. **pdf_editor_pro.py** - Entry point principale per la versione Pro
 4. **requirements.txt** - Aggiunta dipendenza PySide6
 
 #### Documentazione Aggiornata

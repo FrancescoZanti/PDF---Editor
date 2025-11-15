@@ -26,14 +26,10 @@ py --version
 
 ### 🥇 Metodo 1: Doppio Click su File Batch (Più Semplice)
 
-**Per la versione BASE:**
+**Per avviare l'applicazione (consigliato - PRO):**
 1. Vai nella cartella del progetto
-2. **Doppio click** su `avvia_pdf_editor.bat`
-3. Si aprirà una finestra del terminale e poi l'applicazione
-
-**Per la versione PRO:**
-1. **Doppio click** su `avvia_pdf_editor_pro.bat`
-2. Si aprirà un menu di selezione per scegliere la modalità
+2. **Doppio click** su `avvia_pdf_editor_pro.bat`
+3. Si aprirà un menu di selezione per scegliere la modalità
 
 **Vantaggi:**
 - ✅ Più veloce e semplice
@@ -69,17 +65,11 @@ py --version
 
 ### 🥉 Metodo 3: Terminale/Prompt dei Comandi (Universale)
 
-**Versione BASE:**
+**Avvio da terminale (universale):**
 ```bash
 # Apri il terminale nella cartella del progetto
 cd "C:\percorso\del\progetto\PDF---Editor"
 
-# Avvia l'applicazione base
-python pdf_editor.py
-```
-
-**Versione PRO:**
-```bash
 # Avvia l'applicazione Pro con menu di selezione
 python pdf_editor_pro.py
 ```
@@ -123,7 +113,7 @@ python main.py
 ```bash
 # Assicurati di essere nella directory principale del progetto
 cd "C:\Users\francesco.zanti\OneDrive - SITI B&T GROUP S.p.A\Documenti\Github\PDF - Editor"
-python pdf_editor.py
+python pdf_editor_pro.py
 ```
 
 ### Problema: "ModuleNotFoundError"
@@ -144,13 +134,13 @@ pip install PySide6
 ```bash
 chcp 65001
 set PYTHONIOENCODING=utf-8
-python pdf_editor.py
+python pdf_editor_pro.py
 ```
 
 ## 📁 Struttura File di Avvio
 
-- `pdf_editor.py` - Script principale
-- `avvia_pdf_editor.bat` - Launcher batch Windows
+- `pdf_editor_pro.py` - Script principale (Pro)
+- `avvia_pdf_editor_pro.bat` - Launcher batch Windows (Pro)
 - `Avvia_PDF_Editor.ps1` - Launcher PowerShell (raccomandato)
 - `src/main.py` - Applicazione core (PySide6)
 

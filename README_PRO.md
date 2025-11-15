@@ -187,7 +187,7 @@ python acrobat_like_gui.py
 ```
 PDF-Editor/
 ├── 🎯 pdf_editor_pro.py         # ← UNIFICATO: Launcher dell'Editor Avanzato
-├── 📝 pdf_editor.py             # Editor base (funzionalità essenziali)  
+##
 ├── 📂 src/
 │   ├── 🆕 acrobat_like_gui.py   # Interfaccia unificata stile Acrobat
 │   ├── 🆕 advanced_pdf_editor.py # Engine editing avanzato con tutte le funzionalità
@@ -208,16 +208,9 @@ direttamente pronta per modificare i PDF.
 
 ## 🆚 Base vs Pro
 
-| Caratteristica | PDF Editor Base | PDF Editor Pro |
-|----------------|-----------------|----------------|
-| **Launcher** | `pdf_editor.py` | `pdf_editor_pro.py` |
-| **Interfaccia** | PySide6 base | PySide6 professionale |
-| **Unisci/Dividi PDF** | ✅ | ✅ |
-| **Ruota/Estrai Pagine** | ✅ | ✅ |
-| **Watermark** | ✅ Base | ✅ Avanzato |
-| **Conversione Immagini** | ✅ | ✅ |
-| **Editing Testo** | ❌ | ✅ Completo |
-| **Editing Immagini** | ❌ | ✅ Completo |
+Questa documentazione si riferisce alla versione Pro. La repository ora mantiene
+e supporta esclusivamente `pdf_editor_pro.py` come launcher principale.
+La versione base non è più fornita.
 | **Annotazioni/Markup** | ❌ | ✅ |
 | **Form Interattivi** | ❌ | ✅ |
 | **Crittografia/Password** | ❌ | ✅ |

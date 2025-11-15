@@ -58,8 +58,8 @@ cd PDF---Editor
 pip install -r requirements.txt
 
 # 3. Avvia l'applicazione
-python pdf_editor.py
-# oppure doppio click su avvia_pdf_editor.bat
+python pdf_editor_pro.py
+# oppure doppio click su avvia_pdf_editor_pro.bat
 ```
 
 > **💡 Suggerimento**: Per funzionalità avanzate (annotazioni, form, sicurezza), usa `python pdf_editor_pro.py`
@@ -289,7 +289,7 @@ Esegui l'applicazione usando uno di questi metodi:
 **Metodo 1 (Più Semplice):**
 ```bash
 # Doppio click su:
-avvia_pdf_editor.bat
+avvia_pdf_editor_pro.bat
 ```
 
 **Metodo 2 (Raccomandato):**
@@ -300,7 +300,7 @@ Avvia_PDF_Editor.ps1
 
 **Metodo 3 (Terminale):**
 ```bash
-python pdf_editor.py
+python pdf_editor_pro.py
 ```
 
 **Metodo 4 (Sviluppatori):**
@@ -361,11 +361,9 @@ PDF-Editor/
 │
 ├── 📂 output/                       # Cartella output predefinita (creata automaticamente)
 │
-├── 📄 pdf_editor.py                 # 🚀 Launcher versione BASE
 ├── 📄 pdf_editor_pro.py             # 🚀 Launcher versione PRO
-├── 🪟 avvia_pdf_editor.bat          # Script avvio Windows (Base)
 ├── 🪟 avvia_pdf_editor_pro.bat      # Script avvio Windows (Pro)
-├── ⚡ Avvia_PDF_Editor.ps1          # Script PowerShell (Base)
+├── ⚡ Avvia_PDF_Editor.ps1          # Script PowerShell (Pro)
 │
 ├── 📋 requirements.txt              # Dipendenze Python
 ├── 📖 README.md                     # Questa documentazione
@@ -680,7 +678,7 @@ I contributi sono benvenuti! Questo progetto segue le best practice della commun
 6. **Testa** le modifiche:
    ```bash
    python test_simple.py
-   python pdf_editor.py  # Test manuale
+   python pdf_editor_pro.py  # Test manuale
    ```
 7. **Committa** le modifiche con messaggi descrittivi:
    ```bash
@@ -723,9 +721,8 @@ Se trovi un bug, apri una **issue** su GitHub includendo:
 
 ## ❓ Domande Frequenti (FAQ)
 
-### Qual è la differenza tra `pdf_editor.py` e `pdf_editor_pro.py`?
-- **pdf_editor.py** - Versione base con funzionalità essenziali (unisci, dividi, ruota, estrai, watermark, conversione)
-- **pdf_editor_pro.py** - Versione avanzata con annotazioni, form interattivi, sicurezza e crittografia
+### Nota su `pdf_editor_pro.py`
+Questa repository ora mantiene e supporta solo la versione Pro dell'applicazione. Lanciando `python pdf_editor_pro.py` otterrai l'editor avanzato con tutte le funzionalità (annotazioni, form interattivi, sicurezza e crittografia). La versione base non è più fornita.
 
 ### Posso usare l'applicazione su macOS o Linux?
 Al momento l'applicazione è ottimizzata per Windows 10/11. PySide6 è cross-platform, quindi è tecnicamente possibile eseguirla su altri sistemi operativi, ma potrebbe richiedere adattamenti.

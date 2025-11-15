@@ -190,8 +190,8 @@ def main():
         print("  TUTTI I TEST SUPERATI!")
         print("  L'applicazione è pronta per l'uso.")
         print("\n  Per avviare l'applicazione:")
-        print("  - Doppio click su 'avvia_pdf_editor.bat'")
-        print("  - Oppure esegui: python pdf_editor.py")
+        print("  - Doppio click su 'avvia_pdf_editor_pro.bat'")
+        print("  - Oppure esegui: python pdf_editor_pro.py")
     else:
         print("  ALCUNI TEST FALLITI!")
         print("  Controlla gli errori sopra e installa le dipendenze mancanti.")

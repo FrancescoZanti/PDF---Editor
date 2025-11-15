@@ -41,8 +41,8 @@ def test_app():
         print("L'applicazione e' pronta per l'uso.")
         print("")
         print("Per avviare l'applicazione:")
-        print("1. Esegui: python pdf_editor.py")
-        print("2. Oppure usa: ./avvia_pdf_editor.bat")
+        print("1. Esegui: python pdf_editor_pro.py")
+        print("2. Oppure usa: ./avvia_pdf_editor_pro.bat")
         
         return True
         

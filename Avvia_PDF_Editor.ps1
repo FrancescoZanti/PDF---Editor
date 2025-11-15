@@ -25,8 +25,8 @@ try {
 }
 
 # Verifica se il file principale esiste
-if (!(Test-Path "pdf_editor.py")) {
-    Write-Host "ERRORE: File pdf_editor.py non trovato." -ForegroundColor Red
+if (!(Test-Path "pdf_editor_pro.py")) {
+    Write-Host "ERRORE: File pdf_editor_pro.py non trovato." -ForegroundColor Red
     Write-Host "Assicurati di essere nella directory corretta del progetto." -ForegroundColor Yellow
     Read-Host "Premi Enter per uscire"
     exit 1
@@ -35,7 +35,7 @@ if (!(Test-Path "pdf_editor.py")) {
 # Controllo dipendenze
 Write-Host "Controllo dipendenze..." -ForegroundColor Yellow
 try {
-    $testImport = python -c "import pypdf, PIL, reportlab, tkinter; print('OK')" 2>$null
+    $testImport = python -c "import pypdf, PIL, reportlab, PySide6; print('OK')" 2>$null
     if ($LASTEXITCODE -ne 0) {
         throw "Dipendenze mancanti"
     }
@@ -64,8 +64,8 @@ Write-Host ""
 try {
     # Imposta encoding UTF-8
     $env:PYTHONIOENCODING = "utf-8"
-    python pdf_editor.py
-    
+    python pdf_editor_pro.py
+
     if ($LASTEXITCODE -ne 0) {
         Write-Host ""
         Write-Host "L'applicazione si è chiusa con un errore." -ForegroundColor Red
