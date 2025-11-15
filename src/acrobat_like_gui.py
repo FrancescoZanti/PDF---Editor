@@ -2,7 +2,8 @@ from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                                QLabel, QPushButton, QFileDialog, QMessageBox, QFrame,
                                QListWidget, QSpinBox, QRadioButton, QButtonGroup,
                                QGroupBox, QScrollArea, QColorDialog, QInputDialog,
-                               QMenuBar, QMenu, QToolBar, QSplitter)
+                               QMenuBar, QMenu, QToolBar, QSplitter, QDialog, QTextEdit,
+                               QComboBox, QGridLayout)
 from PySide6.QtCore import Qt, QPoint, QRect as QtRect, Signal
 from PySide6.QtGui import QPixmap, QImage, QPainter, QPen, QColor, QFont, QAction
 from PIL import Image
@@ -44,6 +45,12 @@ class AcrobatLikeGUI(QMainWindow):
         self.draw_start_x = 0
         self.draw_start_y = 0
         self.current_points = []
+        
+        # Variabili per la selezione e modifica testo
+        self.selected_annotation = None  # (page_num, annot_index, annotation_obj)
+        self.dragging_annotation = False
+        self.drag_offset_x = 0
+        self.drag_offset_y = 0
         
         self.setup_ui()
         
@@ -591,6 +598,31 @@ class AcrobatLikeGUI(QMainWindow):
         pdf_x = event.pos().x() / self.pdf_editor.zoom_level
         pdf_y = event.pos().y() / self.pdf_editor.zoom_level
         
+        page_num = self.pdf_editor.page_num
+        
+        # Se tool è select, controlla se clicchiamo su un'annotazione di testo
+        if self.current_tool == "select":
+            result = self.pdf_editor.get_annotation_at_point(page_num, pdf_x, pdf_y)
+            if result:
+                annot_index, annot = result
+                # Verifica che sia un'annotazione di testo (FreeText)
+                if annot is not None and annot.type[0] == 2:  # FreeText annotation
+                    self.selected_annotation = (page_num, annot_index, annot)
+                    # Doppio click apre dialog di modifica
+                    if event.type() == event.Type.MouseButtonDblClick:
+                        self.edit_text_annotation_properties()
+                    else:
+                        # Click singolo: prepara per drag
+                        rect = annot.rect
+                        self.drag_offset_x = pdf_x - rect.x0
+                        self.drag_offset_y = pdf_y - rect.y0
+                        self.status_label.setText(f"Annotazione selezionata. Doppio click per modificare, trascina per spostare.")
+                    return
+            else:
+                # Click su area vuota: deseleziona
+                self.selected_annotation = None
+                self.status_label.setText("")
+        
         if self.current_tool == "text":
             self.add_text_at_position(pdf_x, pdf_y)
         elif self.current_tool == "note":
@@ -609,23 +641,53 @@ class AcrobatLikeGUI(QMainWindow):
     
     def on_canvas_drag(self, event):
         """Gestisce trascinamento sul canvas"""
-        if not self.drawing:
-            return
-            
         pdf_x = event.pos().x() / self.pdf_editor.zoom_level
         pdf_y = event.pos().y() / self.pdf_editor.zoom_level
+        
+        # Se stiamo trascinando un'annotazione selezionata
+        if self.current_tool == "select" and self.selected_annotation and not self.dragging_annotation:
+            self.dragging_annotation = True
+            self.status_label.setText("Trascinamento annotazione...")
+            return
+        
+        if not self.drawing:
+            return
         
         if self.current_tool == "freehand":
             self.current_points.append((pdf_x, pdf_y))
     
     def on_canvas_release(self, event):
         """Gestisce rilascio del mouse sul canvas"""
-        if not self.drawing:
-            return
-            
         pdf_x = event.pos().x() / self.pdf_editor.zoom_level
         pdf_y = event.pos().y() / self.pdf_editor.zoom_level
         
+        # Se stavamo trascinando un'annotazione, aggiorna la sua posizione
+        if self.dragging_annotation and self.selected_annotation:
+            page_num, annot_index, annot = self.selected_annotation
+            
+            # Calcola nuova posizione considerando l'offset
+            new_x = pdf_x - self.drag_offset_x
+            new_y = pdf_y - self.drag_offset_y
+            
+            # Calcola nuovo rettangolo mantenendo dimensioni originali
+            old_rect = annot.rect
+            width = old_rect.x1 - old_rect.x0
+            height = old_rect.y1 - old_rect.y0
+            new_rect = fitz.Rect(new_x, new_y, new_x + width, new_y + height)
+            
+            # Aggiorna posizione
+            if self.pdf_editor.modify_text_properties(page_num, annot_index, rect=new_rect):
+                self.update_display()
+                self.status_label.setText("Annotazione spostata con successo")
+            else:
+                self.status_label.setText("Errore nello spostamento dell'annotazione")
+            
+            self.dragging_annotation = False
+            return
+        
+        if not self.drawing:
+            return
+            
         page_num = self.pdf_editor.page_num
         
         # Converti QColor a tuple RGB (0-1)
@@ -790,8 +852,141 @@ class AcrobatLikeGUI(QMainWindow):
     def show_properties(self):
         self.status_label.setText("Proprietà - non ancora implementato")
     
+    def edit_text_annotation_properties(self):
+        """Apre un dialog per modificare tutte le proprietà di un'annotazione di testo"""
+        if not self.selected_annotation:
+            return
+        
+        page_num, annot_index, annot = self.selected_annotation
+        
+        # Ottieni proprietà correnti
+        text_annots = self.pdf_editor.get_text_annotations(page_num)
+        if not text_annots or annot_index >= len(text_annots):
+            QMessageBox.warning(self, "Errore", "Impossibile ottenere proprietà dell'annotazione")
+            return
+        
+        current_props = text_annots[annot_index]
+        
+        # Crea dialog personalizzato
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Modifica Proprietà Testo")
+        dialog.setMinimumWidth(400)
+        layout = QVBoxLayout(dialog)
+        
+        # Campo testo
+        layout.addWidget(QLabel("Testo:"))
+        text_edit = QTextEdit()
+        text_edit.setPlainText(current_props['text'])
+        text_edit.setMaximumHeight(100)
+        layout.addWidget(text_edit)
+        
+        # Font size
+        font_layout = QHBoxLayout()
+        font_layout.addWidget(QLabel("Dimensione font:"))
+        font_size_spin = QSpinBox()
+        font_size_spin.setRange(6, 72)
+        font_size_spin.setValue(int(current_props['font_size']))
+        font_layout.addWidget(font_size_spin)
+        layout.addLayout(font_layout)
+        
+        # Font name
+        font_name_layout = QHBoxLayout()
+        font_name_layout.addWidget(QLabel("Font:"))
+        font_combo = QComboBox()
+        fonts = ["helv", "times", "cour", "symb"]  # Font standard PDF
+        font_combo.addItems(fonts)
+        current_font = current_props.get('font_name', 'helv')
+        if current_font in fonts:
+            font_combo.setCurrentText(current_font)
+        font_name_layout.addWidget(font_combo)
+        layout.addLayout(font_name_layout)
+        
+        # Colore
+        color_layout = QHBoxLayout()
+        color_layout.addWidget(QLabel("Colore testo:"))
+        color_button = QPushButton("Scegli colore")
+        current_color = current_props.get('color', (0, 0, 0))
+        selected_color = QColor(int(current_color[0]*255), int(current_color[1]*255), int(current_color[2]*255))
+        color_button.setStyleSheet(f"background-color: {selected_color.name()}; color: white;")
+        
+        def choose_color():
+            nonlocal selected_color
+            color = QColorDialog.getColor(selected_color, dialog, "Seleziona colore testo")
+            if color.isValid():
+                selected_color = color
+                color_button.setStyleSheet(f"background-color: {color.name()}; color: white;")
+        
+        color_button.clicked.connect(choose_color)
+        color_layout.addWidget(color_button)
+        layout.addLayout(color_layout)
+        
+        # Posizione
+        pos_group = QGroupBox("Posizione")
+        pos_layout = QGridLayout()
+        
+        rect = current_props['rect']
+        pos_x_spin = QSpinBox()
+        pos_x_spin.setRange(0, 5000)
+        pos_x_spin.setValue(int(rect.x0))
+        pos_y_spin = QSpinBox()
+        pos_y_spin.setRange(0, 5000)
+        pos_y_spin.setValue(int(rect.y0))
+        
+        pos_layout.addWidget(QLabel("X:"), 0, 0)
+        pos_layout.addWidget(pos_x_spin, 0, 1)
+        pos_layout.addWidget(QLabel("Y:"), 1, 0)
+        pos_layout.addWidget(pos_y_spin, 1, 1)
+        pos_group.setLayout(pos_layout)
+        layout.addWidget(pos_group)
+        
+        # Pulsanti
+        button_layout = QHBoxLayout()
+        ok_button = QPushButton("OK")
+        cancel_button = QPushButton("Annulla")
+        button_layout.addWidget(ok_button)
+        button_layout.addWidget(cancel_button)
+        layout.addLayout(button_layout)
+        
+        ok_button.clicked.connect(dialog.accept)
+        cancel_button.clicked.connect(dialog.reject)
+        
+        # Mostra dialog
+        if dialog.exec() == QDialog.Accepted:
+            # Raccogli nuovi valori
+            new_text = text_edit.toPlainText()
+            new_font_size = font_size_spin.value()
+            new_font_name = font_combo.currentText()
+            new_color = (selected_color.redF(), selected_color.greenF(), selected_color.blueF())
+            
+            # Calcola nuovo rettangolo con nuova posizione
+            width = rect.x1 - rect.x0
+            height = rect.y1 - rect.y0
+            new_x = pos_x_spin.value()
+            new_y = pos_y_spin.value()
+            new_rect = fitz.Rect(new_x, new_y, new_x + width, new_y + height)
+            
+            # Applica modifiche
+            success = self.pdf_editor.modify_text_properties(
+                page_num, annot_index,
+                text=new_text,
+                font_size=new_font_size,
+                font_name=new_font_name,
+                color=new_color,
+                rect=new_rect
+            )
+            
+            if success:
+                self.update_display()
+                self.status_label.setText("Proprietà testo aggiornate con successo")
+                # Aggiorna annotazione selezionata
+                result = self.pdf_editor.get_annotation_at_point(page_num, new_x + 5, new_y + 5)
+                if result and result[0] is not None and result[1] is not None:
+                    self.selected_annotation = (page_num, result[0], result[1])
+            else:
+                QMessageBox.critical(self, "Errore", "Impossibile modificare le proprietà del testo")
+    
     def modify_text_annotation(self):
-        """Modifica il testo di un'annotazione esistente"""
+        """Modifica il testo di un'annotazione esistente (metodo legacy)"""
         if not self.pdf_editor.current_doc:
             QMessageBox.warning(self, "Attenzione", "Nessun PDF aperto")
             return
